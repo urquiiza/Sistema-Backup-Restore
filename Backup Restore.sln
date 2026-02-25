@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36811.4
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backup Restore", "Backup Restore\Backup Restore.csproj", "{23E9AFEE-04C2-4C94-8E2F-F7E2B57C19C0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tela", "Tela\Tela.csproj", "{2E8F4D62-0F68-4E67-8C97-47407AC1E49D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{23E9AFEE-04C2-4C94-8E2F-F7E2B57C19C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23E9AFEE-04C2-4C94-8E2F-F7E2B57C19C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23E9AFEE-04C2-4C94-8E2F-F7E2B57C19C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23E9AFEE-04C2-4C94-8E2F-F7E2B57C19C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E8F4D62-0F68-4E67-8C97-47407AC1E49D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E8F4D62-0F68-4E67-8C97-47407AC1E49D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E8F4D62-0F68-4E67-8C97-47407AC1E49D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E8F4D62-0F68-4E67-8C97-47407AC1E49D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1F3D8D6B-A8A3-492F-982D-A441C81C07FE}
+	EndGlobalSection
+EndGlobal

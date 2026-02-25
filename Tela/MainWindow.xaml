@@ -1,0 +1,38 @@
+﻿<Window x:Class="Tela.MainWindow"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Tela"
+        mc:Ignorable="d"
+        Title="HOS - Backup Restore" Height="450" Width="375">
+    <Window.Background>
+        <ImageBrush ImageSource="/Resource/dromi-hos.png" Opacity="1"  />
+    </Window.Background>
+    <StackPanel Margin="20">
+        <TextBlock Margin="5,0,0,0" Text="Selecione a Versao do Firebird para o GBAK:" FontWeight="Bold" FontFamily="Arial"/>
+        <StackPanel Orientation="Horizontal" Margin="5,15,0,20" >
+            <RadioButton Name="rbFirebird25" Content="Firebird 2.5" GroupName="VersaoFB" Margin="0,0,20,0" IsChecked="True" Checked="rbFirebird25_Checked"></RadioButton>
+            <RadioButton Name="rbFirebird40" Content="Firebird 4.0" GroupName="VersaoFB" Checked="rbFirebird40_Checked" ></RadioButton>
+        </StackPanel>
+
+        <TextBlock Text="Caminho do Banco Origem:" Margin="5,10,0,0" FontWeight="Bold" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <TextBox Name="txtOrigemPath" Height="20" Margin="0,5,5,0" Width="250" />
+            <Button Name="btnBuscarOrigem" Content="Procurar..." Height="20" Margin="0,5,0,0" Width="60" HorizontalAlignment="Left" Click="btnBuscarOrigem_Click" />
+        </StackPanel>
+
+        <TextBlock Text="Caminho Destino do Banco:" Margin="5,10,0,0" FontWeight="Bold" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <TextBox Name="txtDestinoPath" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True"/>
+            <Button Name="btnBuscarDestino" Content="Procurar..." Height="20" Margin="0,5,0,0" Width="60" HorizontalAlignment="Left" Click="btnBuscarDestino_Click" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Margin="0,80,13,0" HorizontalAlignment="Center" >
+            <Button Name="btnIniciar" Content="Iniciar" Width="130" Margin="10,0,0,0" Click="btnIniciar_Click" />
+            <Button Name="btnSair" Content="Sair" Width="130" Margin="5,0,0,0" Click="btnSair_Click" />
+        </StackPanel>
+    </StackPanel>
+</Window>
