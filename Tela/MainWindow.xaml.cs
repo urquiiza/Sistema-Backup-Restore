@@ -11,6 +11,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Backup_Restore;
 using Microsoft.Win32;
+using Tela.ViewModels;
 
 namespace Tela
 {
@@ -24,6 +25,7 @@ namespace Tela
         public MainWindow()
         {
             InitializeComponent();
+            this.DataContext = new MainViewModel();
         }
 
         private void btnBuscarOrigem_Click(object sender, RoutedEventArgs e)
