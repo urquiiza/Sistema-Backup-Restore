@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Tela;
 using Tela.ViewModels;
 
@@ -22,5 +23,7 @@ namespace Tela.ViewModels
         
         private bool _selecaoFire40 = true;
         public bool SelecaoFire40 { get => _selecaoFire40; set => _selecaoFire40 = value; }
+
+        public ICommand? BtnIniciar { get; }
     }
 }

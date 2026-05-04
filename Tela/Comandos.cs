@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Net.Mail;
 
 namespace Backup_Restore
 {
@@ -25,7 +26,11 @@ namespace Backup_Restore
             {
                 novoNome = Path.ChangeExtension(nomeOriginal, ".FDB");
             }
-            else
+            else if (extensao == ".dump")
+            {
+                novoNome = Path.ChangeExtension(nomeOriginal);
+                return novoNome;
+            }
             {
                 throw new Exception("Extensão não suportada.");
             }
@@ -50,6 +55,20 @@ namespace Backup_Restore
             {
                 //restore
                 argumentos = $"-c -v -user sysdba -pass masterkey -rep -FIX_FSS_D win1252 -FIX_FSS_M win1252 -P 8192 \"{bancoOrigem}\" \"{caminhoDestino}\"";
+            }
+            else { throw new Exception("Extensão não suportada"); }
+
+            return argumentos;
+        }
+        public static string RestorePostgres(string versao, string senha, string nomeBanco, string caminhoDump)
+        {
+            Environment.SetEnvironmentVariable("PGPASSWORD", senha);
+            string argumentos = "";
+            string extensao = Path.GetExtension(caminhoDump).ToLower();
+
+            if (extensao == ".dump")
+            {
+                argumentos = $"\"{versao}\\bin\\pg_restore.exe\" -U postgres -d {nomeBanco} -v \"{caminhoDump}\"";
             }
             else { throw new Exception("Extensão não suportada"); }
 

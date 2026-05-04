@@ -28,6 +28,18 @@ namespace Tela
             this.DataContext = new MainViewModel();
         }
 
+        private void btnBuscarPostgres_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Filter = "Arquivos dump|*.dump";
+            var arquivoSelecao = dlg.ShowDialog();
+
+            if (arquivoSelecao == true)
+            {
+                txtPostgresPath.Text = dlg.FileName;
+            }
+        }
+
         private void btnBuscarOrigem_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog dlg = new OpenFileDialog();
@@ -81,12 +93,18 @@ namespace Tela
             {
                 caminhoGbak = "C:\\Program Files\\Firebird\\Firebird_2_5\\bin\\gbak.exe";
             }
-            else
+            else if (rbFirebird40.IsChecked == true)
             {
                 caminhoGbak = "C:\\Program Files\\Firebird\\Firebird_4_0\\gbak.exe";
             }
+            else
+            {
+                Comandos.RestorePostgres()
+                
+            }
 
-            string origem = txtOrigemPath.Text;
+
+                string origem = txtOrigemPath.Text;
             string destino = txtDestinoPath.Text;
 
             string argumentos = Comandos.Comando(origem, destino);
@@ -147,6 +165,18 @@ namespace Tela
         private void rbFirebird40_Checked(object sender, RoutedEventArgs e)
         {
 
+        }
+        private void rbPostgres_Checked(object sender, RoutedEventArgs e)
+        {
+            txtVersao.Visibility = Visibility.Visible;
+            txtSenha.Visibility = Visibility.Visible;
+            txtNomeBanco.Visibility = Visibility.Visible;
+        }
+        private void rbPostgres_Unchecked(object sender, RoutedEventArgs e)
+        {
+            txtVersao.Visibility = Visibility.Collapsed;
+            txtSenha.Visibility = Visibility.Collapsed;
+            txtNomeBanco.Visibility = Visibility.Collapsed;
         }
     }
 }

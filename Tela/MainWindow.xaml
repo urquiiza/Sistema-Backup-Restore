@@ -14,24 +14,47 @@
     <StackPanel Margin="20">
         <TextBlock Margin="5,0,0,0" Text="Selecione a Versao do Firebird para o GBAK:" FontWeight="Bold" FontFamily="Arial"/>
         <StackPanel Orientation="Horizontal" Margin="5,15,0,20" >
-            <RadioButton Name="rbFirebird25" Content="Firebird 2.5" GroupName="VersaoFB" Margin="0,0,20,0" IsChecked="{Binding SelecaoFire25}" Checked="rbFirebird25_Checked"></RadioButton>
-            <RadioButton Name="rbFirebird40" Content="Firebird 4.0" GroupName="VersaoFB" IsChecked="{Binding SelecaoFire40}" Checked="rbFirebird40_Checked" ></RadioButton>
+            <RadioButton Name="rbFirebird25" Content="Firebird 2.5" GroupName="VersaoFB" Margin="0,0,10,0" IsChecked="True" Checked=" rbFirebird25_Checked" ></RadioButton>
+            <RadioButton Name="rbFirebird40" Content="Firebird 4.0" GroupName="VersaoFB" Margin="0,0,10,0" IsChecked="True" Checked="rbFirebird40_Checked" ></RadioButton>
+			<RadioButton Name ="rbPostgres" Content="Postgres" IsChecked="True" Checked="rbPostgres_Checked" Unchecked="rbPostgres_Unchecked" ></RadioButton>
         </StackPanel>
+
+		<TextBlock Text="Caminho Versão Postgres:" Margin="5,10,0,0" FontWeight="Bold" />
+		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+			<TextBox Name="txtPostgresPath" Height="20" Margin="0,5,5,0" Width="250" />
+			<Button Name="btnBuscarPostgres" Content="Procurar..." Height="20" Margin="0,5,0,0" Width="60" HorizontalAlignment="Left" Click="btnBuscarPostgres_Click" />
+		</StackPanel>
 
         <TextBlock Text="Caminho do Banco Origem:" Margin="5,10,0,0" FontWeight="Bold" />
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <TextBox Text="{Binding OrigemBanco}" Name="txtOrigemPath" Height="20" Margin="0,5,5,0" Width="250" />
+            <TextBox Name="txtOrigemPath" Height="20" Margin="0,5,5,0" Width="250" />
             <Button Name="btnBuscarOrigem" Content="Procurar..." Height="20" Margin="0,5,0,0" Width="60" HorizontalAlignment="Left" Click="btnBuscarOrigem_Click" />
         </StackPanel>
 
         <TextBlock Text="Caminho Destino do Banco:" Margin="5,10,0,0" FontWeight="Bold" />
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <TextBox Text="{Binding DestinoBanco}" Name="txtDestinoPath" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True"/>
+            <TextBox Name="txtDestinoPath" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True"/>
             <Button Name="btnBuscarDestino" Content="Procurar..." Height="20" Margin="0,5,0,0" Width="60" HorizontalAlignment="Left" Click="btnBuscarDestino_Click" />
+        </StackPanel>
+        
+		<TextBlock Text="Caminho Versão Postgres:" Margin="5,10,0,0" FontWeight="Bold" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <TextBox Name="txtVersao" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True"/>
+            <Button Name="btnBuscarVersao" Content="Procurar..." Height="20" Margin="0,5,0,0" Width="60" HorizontalAlignment="Left" Click="btnBuscarVersao_Click" />
+        </StackPanel>
+        
+		<TextBlock Text="Senha Banco Postgres:" Margin="5,10,0,0" FontWeight="Bold" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <TextBox Name="txtSenha" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True"/>
+        </StackPanel>
+		
+		<TextBlock Text="Nome do Banco:" Margin="5,10,0,0" FontWeight="Bold" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <TextBox Name="txtNomeBanco" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True"/>
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" Margin="0,80,13,0" HorizontalAlignment="Center" >
-            <Button Name="btnIniciar" Content="Iniciar" Width="130" Margin="10,0,0,0" Command="{Binding}" />
+            <Button Name="btnIniciar" Content="Iniciar" Width="130" Margin="10,0,0,0" Command="{Binding BtnIniciar}" />
             <Button Name="btnSair" Content="Sair" Width="130" Margin="5,0,0,0" Click="btnSair_Click" />
         </StackPanel>
     </StackPanel>
