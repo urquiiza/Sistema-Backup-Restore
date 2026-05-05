@@ -28,25 +28,20 @@ namespace Tela
             this.DataContext = new MainViewModel();
         }
 
-        private void btnBuscarPostgres_Click(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog dlg = new OpenFileDialog();
-            dlg.Filter = "Arquivos dump|*.dump";
-            var arquivoSelecao = dlg.ShowDialog();
-
-            if (arquivoSelecao == true)
-            {
-                txtPostgresPath.Text = dlg.FileName;
-            }
-        }
-
         private void btnBuscarOrigem_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog dlg = new OpenFileDialog();
-            dlg.Filter = "Arquivos FDB/FBK|*.FDB;*.FBK";
-            var arquivoSelecao = dlg.ShowDialog();
 
-            if (arquivoSelecao == true)
+            if (rbPostgres.IsChecked == true)
+            {
+                dlg.Filter = "Arquivos PostgreSQL (*.dump)|*.dump";
+            }
+            else
+            {
+                dlg.Filter = "Arquivos Firebird (*.fbk;*.fdb)|*.fbk;*.fdb|Todos os arquivos|*.*";
+            }
+
+            if (dlg.ShowDialog() == true)
             {
                 txtOrigemPath.Text = dlg.FileName;
             }
@@ -87,32 +82,37 @@ namespace Tela
                 return;
             }
 
-            string caminhoGbak = "";
+            string caminhoExecutavel = "";
+            string argumentosProcesso = "";
+
+            string origem = txtOrigemPath.Text;
+            string destino = txtDestinoPath.Text;
 
             if (rbFirebird25.IsChecked == true)
             {
-                caminhoGbak = "C:\\Program Files\\Firebird\\Firebird_2_5\\bin\\gbak.exe";
+                caminhoExecutavel = "C:\\Program Files\\Firebird\\Firebird_2_5\\bin\\gbak.exe";
+                argumentosProcesso = Comandos.Comando(origem, destino);
             }
             else if (rbFirebird40.IsChecked == true)
             {
-                caminhoGbak = "C:\\Program Files\\Firebird\\Firebird_4_0\\gbak.exe";
+                caminhoExecutavel = "C:\\Program Files\\Firebird\\Firebird_4_0\\gbak.exe";
+                argumentosProcesso = Comandos.Comando(origem, destino);
             }
-            else
+            else if (rbPostgres.IsChecked == true)
             {
-                Comandos.RestorePostgres()
-                
+                string versao = txtVersao.Text;
+                string nomeBanco = txtNomeBanco.Text;
+                string senha = txtSenha.Text;
+
+                caminhoExecutavel = $"{versao}\\bin\\pg_restore.exe";
+
+                argumentosProcesso = Comandos.RestorePostgres(versao, nomeBanco, senha, origem);
             }
-
-
-                string origem = txtOrigemPath.Text;
-            string destino = txtDestinoPath.Text;
-
-            string argumentos = Comandos.Comando(origem, destino);
 
             var config = new ProcessStartInfo
             {
-                FileName = caminhoGbak,
-                Arguments = argumentos,
+                FileName = caminhoExecutavel,
+                Arguments = argumentosProcesso,
                 CreateNoWindow = true,
                 UseShellExecute = false
             };
@@ -139,7 +139,7 @@ namespace Tela
                 if (processoAtual.ExitCode != 0)
                 {
                     btnIniciar.Content = "Iniciar";
-                    MessageBox.Show("O GBAK falhou. Verifique se a versão selecionada corresponde a versão do banco!");
+                    MessageBox.Show("O processo falhou. Verifique se a versão selecionada corresponde a versão do banco!");
                     return;
                 }
                 btnIniciar.Content = "Iniciar";
@@ -168,15 +168,39 @@ namespace Tela
         }
         private void rbPostgres_Checked(object sender, RoutedEventArgs e)
         {
+            lblVersao.Visibility = Visibility.Visible;
             txtVersao.Visibility = Visibility.Visible;
+            btnBuscarVersao.Visibility = Visibility.Visible;
+
+            lblSenha.Visibility = Visibility.Visible;   
             txtSenha.Visibility = Visibility.Visible;
+
+            lblNomeBanco.Visibility = Visibility.Visible;
             txtNomeBanco.Visibility = Visibility.Visible;
+
+            lblDestino.Visibility = Visibility.Collapsed;
+            txtDestinoPath.Visibility = Visibility.Collapsed;
+            btnBuscarDestino.Visibility = Visibility.Collapsed;
         }
         private void rbPostgres_Unchecked(object sender, RoutedEventArgs e)
         {
+            lblVersao.Visibility = Visibility.Collapsed;
             txtVersao.Visibility = Visibility.Collapsed;
+            btnBuscarVersao.Visibility = Visibility.Collapsed;
+
+            lblSenha.Visibility = Visibility.Collapsed;
             txtSenha.Visibility = Visibility.Collapsed;
+
+            lblNomeBanco.Visibility = Visibility.Collapsed;
             txtNomeBanco.Visibility = Visibility.Collapsed;
+
+            lblDestino.Visibility = Visibility.Visible;
+            txtDestinoPath.Visibility = Visibility.Visible;
+            btnBuscarDestino.Visibility = Visibility.Visible;
+        }
+        private void btnBuscarVersao_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

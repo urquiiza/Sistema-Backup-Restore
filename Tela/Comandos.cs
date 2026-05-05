@@ -28,7 +28,7 @@ namespace Backup_Restore
             }
             else if (extensao == ".dump")
             {
-                novoNome = Path.ChangeExtension(nomeOriginal);
+                novoNome = Path.ChangeExtension(nomeOriginal, ".dump");
                 return novoNome;
             }
             {
@@ -68,7 +68,7 @@ namespace Backup_Restore
 
             if (extensao == ".dump")
             {
-                argumentos = $"\"{versao}\\bin\\pg_restore.exe\" -U postgres -d {nomeBanco} -v \"{caminhoDump}\"";
+                argumentos = $"-U postgres -d {nomeBanco} -v \"{caminhoDump}\"";
             }
             else { throw new Exception("Extensão não suportada"); }
 
