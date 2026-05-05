@@ -131,9 +131,10 @@ namespace Tela
             {
                 FileName = caminhoExecutavel,
                 Arguments = argumentosProcesso,
-                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
                 UseShellExecute = false,
-                RedirectStandardError = true
+                CreateNoWindow = true
             };
 
             if (rbPostgres.IsChecked == true)
@@ -143,16 +144,43 @@ namespace Tela
 
             try
             {
-                JanelaCarregamento telaLoading = new JanelaCarregamento();
-                processoAtual = Process.Start(config);
+                processoAtual = new Process();
+                processoAtual.StartInfo = config;
+
+                processoAtual.OutputDataReceived += (s, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                    {
+                        Dispatcher.Invoke(() => {
+                            txtTerminal.AppendText(e.Data + Environment.NewLine);
+                            txtTerminal.ScrollToEnd(); 
+                        });
+                    }
+                };
+
+                processoAtual.ErrorDataReceived += (s, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                    {
+                        Dispatcher.Invoke(() => {
+                            txtTerminal.AppendText(e.Data + Environment.NewLine);
+                            txtTerminal.ScrollToEnd();
+                        });
+                    }
+                };
+
+                processoAtual.Start();
+
+                processoAtual.BeginOutputReadLine();
+                processoAtual.BeginErrorReadLine();
+
+                AbasMenu.SelectedIndex = 1;
                 
                 btnIniciar.Content = "Cancelar";
                 btnSair.IsEnabled = false;
                 
-                telaLoading.Show();
-                string erroDoBanco = await processoAtual.StandardError.ReadToEndAsync();
+                await processoAtual.WaitForExitAsync();
                 
-                telaLoading.Close();
                 btnSair.IsEnabled = true;
 
                 if (canceladoPelousuario == true)
@@ -163,7 +191,7 @@ namespace Tela
                 if (processoAtual.ExitCode != 0)
                 {
                     btnIniciar.Content = "Iniciar";
-                    MessageBox.Show($"O processo falhou!\n\nMotivo:\n{erroDoBanco}");
+                    MessageBox.Show($"O processo falhou!\n\nVerifique o Terminal para ver o motivo exato do erro.");
                     return;
                 }
                 btnIniciar.Content = "Iniciar";
@@ -172,7 +200,7 @@ namespace Tela
             catch (Exception ex)
             {
                 btnSair.IsEnabled = true;
-                MessageBox.Show($"ERRO: nao foi possivel encontrar o arquivo GBAK. \n{ex.Message}");
+                MessageBox.Show($"ERRO ao executar o processo. \n{ex.Message}");
                 return;
             }
         }

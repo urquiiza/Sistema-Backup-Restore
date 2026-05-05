@@ -26,14 +26,7 @@ namespace Backup_Restore
             {
                 novoNome = Path.ChangeExtension(nomeOriginal, ".FDB");
             }
-            else if (extensao == ".dump")
-            {
-                novoNome = Path.ChangeExtension(nomeOriginal, ".dump");
-                return novoNome;
-            }
-            {
-                throw new Exception("Extensão não suportada.");
-            }
+            else { throw new Exception("Extensão não suportada."); }
 
             caminhoFinal = Path.Combine(caminhoDestino, novoNome);
             return caminhoFinal;
@@ -62,7 +55,6 @@ namespace Backup_Restore
         }
         public static string RestorePostgres(string versao, string nomeBanco, string senha, string caminhoDump)
         {
-            Environment.SetEnvironmentVariable("PGPASSWORD", senha);
             string argumentos = "";
             string extensao = Path.GetExtension(caminhoDump).ToLower();
 

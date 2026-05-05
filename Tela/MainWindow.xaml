@@ -11,45 +11,67 @@
     <Window.Background>
         <ImageBrush ImageSource="/Resource/dromi-hos.png" Opacity="1"  />
     </Window.Background>
-    <StackPanel Margin="20">
-        <TextBlock Margin="5,0,0,0" Text="Selecione o Banco de Dados:" FontWeight="Bold" FontFamily="Arial"/>
-        <StackPanel Orientation="Horizontal" Margin="5,15,0,20" >
-            <RadioButton Name="rbFirebird25" Content="Firebird 2.5" GroupName="Banco" Margin="0,0,10,0" IsChecked="True" Checked=" rbFirebird25_Checked" ></RadioButton>
-            <RadioButton Name="rbFirebird40" Content="Firebird 4.0" GroupName="Banco" Margin="0,0,10,0"  Checked="rbFirebird40_Checked" ></RadioButton>
-			<RadioButton Name ="rbPostgres" Content="Postgres" GroupName="Banco" Checked="rbPostgres_Checked" Unchecked="rbPostgres_Unchecked" ></RadioButton>
-        </StackPanel>
+    <TabControl x:Name="AbasMenu">
+        <TabItem Header="Configurações">
+            <StackPanel Margin="20">
+                <TextBlock Margin="5,0,0,0" Text="Selecione o Banco de Dados:" FontWeight="Bold" FontFamily="Arial"/>
+                <StackPanel Orientation="Horizontal" Margin="5,15,0,20" >
+                    <RadioButton Name="rbFirebird25" Content="Firebird 2.5" GroupName="Banco" Margin="0,0,10,0" IsChecked="True" Checked=" rbFirebird25_Checked" ></RadioButton>
+                    <RadioButton Name="rbFirebird40" Content="Firebird 4.0" GroupName="Banco" Margin="0,0,10,0"  Checked="rbFirebird40_Checked" ></RadioButton>
+                    <RadioButton Name ="rbPostgres" Content="Postgres" GroupName="Banco" Checked="rbPostgres_Checked" Unchecked="rbPostgres_Unchecked" ></RadioButton>
+                </StackPanel>
 
-        <TextBlock Text="Caminho do Banco Origem:" Margin="5,10,0,0" FontWeight="Bold" />
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <TextBox Name="txtOrigemPath" Height="20" Margin="0,5,5,0" Width="250" />
-            <Button Name="btnBuscarOrigem" Content="Procurar..." Height="20" Margin="0,5,0,0" Width="60" HorizontalAlignment="Left" Click="btnBuscarOrigem_Click" />
-        </StackPanel>
+                <TextBlock Text="Caminho do Banco Origem:" Margin="5,10,0,0" FontWeight="Bold" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBox Name="txtOrigemPath" Height="20" Margin="0,5,5,0" Width="250" />
+                    <Button Name="btnBuscarOrigem" Content="Procurar..." Height="20" Margin="0,5,0,0" Width="60" HorizontalAlignment="Left" Click="btnBuscarOrigem_Click" />
+                </StackPanel>
 
-        <TextBlock Name="lblDestino" Text="Caminho Destino do Banco:" Margin="5,10,0,0" FontWeight="Bold" />
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <TextBox Name="txtDestinoPath" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True"/>
-            <Button Name="btnBuscarDestino" Content="Procurar..." Height="20" Margin="0,5,0,0" Width="60" HorizontalAlignment="Left" Click="btnBuscarDestino_Click" />
-        </StackPanel>
+                <TextBlock Name="lblDestino" Text="Caminho Destino do Banco:" Margin="5,10,0,0" FontWeight="Bold" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBox Name="txtDestinoPath" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True"/>
+                    <Button Name="btnBuscarDestino" Content="Procurar..." Height="20" Margin="0,5,0,0" Width="60" HorizontalAlignment="Left" Click="btnBuscarDestino_Click" />
+                </StackPanel>
 
-		<TextBlock Name="lblVersao" Text="Caminho Versão Postgres:" Margin="5,10,0,0" FontWeight="Bold" Visibility="Collapsed" />
-		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-			<TextBox Name="txtVersao" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
-			<Button Name="btnBuscarVersao" Content="Procurar..." Height="20" Margin="0,5,0,0" Width="60" HorizontalAlignment="Left" Click="btnBuscarVersao_Click" Visibility="Collapsed"/>
-		</StackPanel>
+                <TextBlock Name="lblVersao" Text="Caminho Versão Postgres:" Margin="5,10,0,0" FontWeight="Bold" Visibility="Collapsed" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBox Name="txtVersao" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
+                    <Button Name="btnBuscarVersao" Content="Procurar..." Height="20" Margin="0,5,0,0" Width="60" HorizontalAlignment="Left" Click="btnBuscarVersao_Click" Visibility="Collapsed"/>
+                </StackPanel>
 
-		<TextBlock Name="lblNomeBanco" Text="Nome do Banco:" Margin="5,10,0,0" FontWeight="Bold" Visibility="Collapsed" />
-		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-			<TextBox Name="txtNomeBanco" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
-		</StackPanel>
-		
-        <TextBlock Name="lblSenha" Text="Senha Banco Postgres:" Margin="5,10,0,0" FontWeight="Bold" Visibility="Collapsed" />
-		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-			<TextBox Name="txtSenha" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
-		</StackPanel>
+                <TextBlock Name="lblNomeBanco" Text="Nome do Banco:" Margin="5,10,0,0" FontWeight="Bold" Visibility="Collapsed" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBox Name="txtNomeBanco" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
+                </StackPanel>
 
-        <StackPanel Orientation="Horizontal" Margin="0,80,13,0" HorizontalAlignment="Center" >
-            <Button Name="btnIniciar" Content="Iniciar" Width="130" Margin="10,0,0,0" Click="btnIniciar_Click" />
-            <Button Name="btnSair" Content="Sair" Width="130" Margin="5,0,0,0" Click="btnSair_Click" />
-        </StackPanel>
-    </StackPanel>
+                <TextBlock Name="lblSenha" Text="Senha Banco Postgres:" Margin="5,10,0,0" FontWeight="Bold" Visibility="Collapsed" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBox Name="txtSenha" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,80,13,0" HorizontalAlignment="Center" >
+                    <Button Name="btnIniciar" Content="Iniciar" Width="130" Margin="10,0,0,0" Click="btnIniciar_Click" />
+                    <Button Name="btnSair" Content="Sair" Width="130" Margin="5,0,0,0" Click="btnSair_Click" />
+                </StackPanel>
+            </StackPanel>
+        </TabItem>
+        <TabItem Header="Monitor">
+            <Grid Background="Black">
+                <Grid Background="#252526">
+                    <TextBox x:Name="txtTerminal" 
+                         FontFamily="Consolas" 
+                         FontSize="14"
+                         Background="#1E1E1E" 
+                         Foreground="#4AF626" 
+                         IsReadOnly="True" 
+                         TextWrapping="Wrap" 
+                         VerticalScrollBarVisibility="Auto" 
+                         BorderThickness="1" 
+                         BorderBrush="#3E3E42"
+                         Margin="10"
+                         Text="Aguardando inicialização do processo...&#x0A;"/>
+                </Grid>
+            </Grid>
+        </TabItem>
+    </TabControl>
 </Window>
