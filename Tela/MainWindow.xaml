@@ -37,14 +37,14 @@
 			<Button Name="btnBuscarVersao" Content="Procurar..." Height="20" Margin="0,5,0,0" Width="60" HorizontalAlignment="Left" Click="btnBuscarVersao_Click" Visibility="Collapsed"/>
 		</StackPanel>
 
-		<TextBlock Name="lblSenha" Text="Senha Banco Postgres:" Margin="5,10,0,0" FontWeight="Bold" Visibility="Collapsed" />
-		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-			<TextBox Name="txtSenha" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
-		</StackPanel>
-
 		<TextBlock Name="lblNomeBanco" Text="Nome do Banco:" Margin="5,10,0,0" FontWeight="Bold" Visibility="Collapsed" />
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
 			<TextBox Name="txtNomeBanco" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
+		</StackPanel>
+		
+        <TextBlock Name="lblSenha" Text="Senha Banco Postgres:" Margin="5,10,0,0" FontWeight="Bold" Visibility="Collapsed" />
+		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+			<TextBox Name="txtSenha" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
 		</StackPanel>
 
         <StackPanel Orientation="Horizontal" Margin="0,80,13,0" HorizontalAlignment="Center" >

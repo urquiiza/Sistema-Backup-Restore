@@ -60,7 +60,7 @@ namespace Backup_Restore
 
             return argumentos;
         }
-        public static string RestorePostgres(string versao, string senha, string nomeBanco, string caminhoDump)
+        public static string RestorePostgres(string versao, string nomeBanco, string senha, string caminhoDump)
         {
             Environment.SetEnvironmentVariable("PGPASSWORD", senha);
             string argumentos = "";

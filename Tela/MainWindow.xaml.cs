@@ -58,6 +58,24 @@ namespace Tela
                 txtDestinoPath.Text = dlg.FolderName;
             }
         }
+
+        private void btnBuscarVersao_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.Title = "Selecione o pg_restore.exe";
+            dlg.Filter = "Executável do PostgreSQL (pg_restore.exe)|pg_restore.exe|Arquivos Executáveis (*.exe)|*.exe";
+            
+            if (dlg.ShowDialog() == true)
+            {
+                string caminhoCompleto = dlg.FileName;
+                string pastaBin = System.IO.Path.GetDirectoryName(caminhoCompleto);
+                string pastaVersao = System.IO.Path.GetDirectoryName(pastaBin);
+
+                txtVersao.Text = pastaVersao;
+            }
+        }
+
         private async void btnIniciar_Click(object sender, RoutedEventArgs e)
         {
             if (btnIniciar.Content.ToString() == "Cancelar")
@@ -76,7 +94,7 @@ namespace Tela
                 MessageBox.Show("Selecione um arquivo de banco de dados!");
                 return;
             }
-            if (string.IsNullOrEmpty(txtDestinoPath.Text))
+            if (string.IsNullOrEmpty(txtDestinoPath.Text) && rbPostgres.IsChecked == false)
             {
                 MessageBox.Show("Selecione uma pasta destino!");
                 return;
@@ -98,7 +116,7 @@ namespace Tela
                 caminhoExecutavel = "C:\\Program Files\\Firebird\\Firebird_4_0\\gbak.exe";
                 argumentosProcesso = Comandos.Comando(origem, destino);
             }
-            else if (rbPostgres.IsChecked == true)
+            else
             {
                 string versao = txtVersao.Text;
                 string nomeBanco = txtNomeBanco.Text;
@@ -114,8 +132,14 @@ namespace Tela
                 FileName = caminhoExecutavel,
                 Arguments = argumentosProcesso,
                 CreateNoWindow = true,
-                UseShellExecute = false
+                UseShellExecute = false,
+                RedirectStandardError = true
             };
+
+            if (rbPostgres.IsChecked == true)
+            {
+                config.EnvironmentVariables["PGPASSWORD"] = txtSenha.Text;
+            }
 
             try
             {
@@ -126,7 +150,7 @@ namespace Tela
                 btnSair.IsEnabled = false;
                 
                 telaLoading.Show();
-                await processoAtual.WaitForExitAsync();
+                string erroDoBanco = await processoAtual.StandardError.ReadToEndAsync();
                 
                 telaLoading.Close();
                 btnSair.IsEnabled = true;
@@ -139,7 +163,7 @@ namespace Tela
                 if (processoAtual.ExitCode != 0)
                 {
                     btnIniciar.Content = "Iniciar";
-                    MessageBox.Show("O processo falhou. Verifique se a versão selecionada corresponde a versão do banco!");
+                    MessageBox.Show($"O processo falhou!\n\nMotivo:\n{erroDoBanco}");
                     return;
                 }
                 btnIniciar.Content = "Iniciar";
@@ -172,11 +196,11 @@ namespace Tela
             txtVersao.Visibility = Visibility.Visible;
             btnBuscarVersao.Visibility = Visibility.Visible;
 
-            lblSenha.Visibility = Visibility.Visible;   
-            txtSenha.Visibility = Visibility.Visible;
-
             lblNomeBanco.Visibility = Visibility.Visible;
             txtNomeBanco.Visibility = Visibility.Visible;
+
+            lblSenha.Visibility = Visibility.Visible;   
+            txtSenha.Visibility = Visibility.Visible;
 
             lblDestino.Visibility = Visibility.Collapsed;
             txtDestinoPath.Visibility = Visibility.Collapsed;
@@ -197,10 +221,6 @@ namespace Tela
             lblDestino.Visibility = Visibility.Visible;
             txtDestinoPath.Visibility = Visibility.Visible;
             btnBuscarDestino.Visibility = Visibility.Visible;
-        }
-        private void btnBuscarVersao_Click(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 }
