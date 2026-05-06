@@ -10,7 +10,8 @@
         xmlns:local="clr-namespace:Tela"
         mc:Ignorable="d"
         Title="HOS - Backup Restore" Height="450" Width="375"
-        Icon="/Resource/hos-farma.png">
+        Icon="/Resource/hos-farma.png"
+        Closing="Window_Closing">
     <Window.Background>
         <ImageBrush ImageSource="/Resource/dromi-hos.png" Opacity="1"  />
     </Window.Background>
@@ -157,9 +158,15 @@
                             <TextBox Name="txtNomeBanco" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
                         </StackPanel>
 
-                        <TextBlock Name="lblSenha" Text="Senha Banco Postgres:" Margin="5,10,0,0" HorizontalAlignment="Center" FontWeight="SemiBold" Visibility="Collapsed" />
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBox Name="txtSenha" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
+                        <StackPanel Margin="0,5">
+                            <TextBlock Name="lblSenha" Text="Senha Banco Postgres:" HorizontalAlignment="Center" Margin="0,0,0,5" FontWeight="SemiBold" Visibility="Collapsed"/>
+                            <DockPanel Name="panelSenha" Visibility="Collapsed">
+                                <ToggleButton Name="btnVerSenha" Content="👁" DockPanel.Dock="Right" Width="35" Click="btnVerSenha_Click" ToolTip="Ver/Ocultar Senha"/>
+                                <Grid>
+                                    <PasswordBox Name="pbSenha" Height="20" Padding="5,0,0,0" Width="220" VerticalContentAlignment="Center" PasswordChar="*"/>
+                                    <TextBox Name="txtSenhaVisivel" Height="20" Width="220" VerticalContentAlignment="Center" Visibility="Collapsed"/>
+                                </Grid>
+                            </DockPanel>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>

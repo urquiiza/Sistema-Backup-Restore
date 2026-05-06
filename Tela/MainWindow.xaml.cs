@@ -22,6 +22,8 @@ namespace Tela
     {
         private Process processoAtual;
         private bool canceladoPelousuario = false;
+        private System.Windows.Forms.NotifyIcon iconeBandeja;
+        private bool fechamentoSeguro = false;
         public MainWindow()
         {
             InitializeComponent();
@@ -41,14 +43,25 @@ namespace Tela
                 txtTerminal.AppendText(sb.ToString());
                 txtTerminal.ScrollToEnd();
             };
-         }
+
+            iconeBandeja = new System.Windows.Forms.NotifyIcon();
+            iconeBandeja.Icon = System.Drawing.Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            iconeBandeja.Text = "HOS - Backup e Restore";
+
+            iconeBandeja.DoubleClick += (s, args) =>
+            {
+                this.Show();
+                this.WindowState = WindowState.Normal;
+                iconeBandeja.Visible = false;
+            };
+        }
 
         private System.Windows.Threading.DispatcherTimer timerTerminal;
         private System.Collections.Concurrent.ConcurrentQueue<string> filaLogs = new System.Collections.Concurrent.ConcurrentQueue<string>();
 
         private void btnBuscarOrigem_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog dlg = new OpenFileDialog();
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
 
             if (rbPostgres.IsChecked == true)
             {
@@ -79,7 +92,7 @@ namespace Tela
 
         private void btnBuscarVersao_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog dlg = new OpenFileDialog();
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
 
             dlg.Title = "Selecione o pg_restore.exe";
             dlg.Filter = "Executável do PostgreSQL (pg_restore.exe)|pg_restore.exe|Arquivos Executáveis (*.exe)|*.exe";
@@ -109,12 +122,12 @@ namespace Tela
 
             if (string.IsNullOrEmpty(txtOrigemPath.Text))
             {
-                MessageBox.Show("Selecione um arquivo de banco de dados!");
+                System.Windows.MessageBox.Show("Selecione um arquivo de banco de dados!");
                 return;
             }
             if (string.IsNullOrEmpty(txtDestinoPath.Text) && rbPostgres.IsChecked == false)
             {
-                MessageBox.Show("Selecione uma pasta destino!");
+                System.Windows.MessageBox.Show("Selecione uma pasta destino!");
                 return;
             }
 
@@ -138,7 +151,7 @@ namespace Tela
             {
                 string versao = txtVersao.Text;
                 string nomeBanco = txtNomeBanco.Text;
-                string senha = txtSenha.Text;
+                string senha = ObterSenhaAtual();
 
                 caminhoExecutavel = $"{versao}\\bin\\pg_restore.exe";
 
@@ -157,10 +170,10 @@ namespace Tela
 
             if (rbPostgres.IsChecked == true)
             {
-                config.EnvironmentVariables["PGPASSWORD"] = txtSenha.Text;
+                config.EnvironmentVariables["PGPASSWORD"] = ObterSenhaAtual();
             }
 
-            //txtTerminal.Clear();
+            txtTerminal.Clear();
 
             try
             {
@@ -221,22 +234,23 @@ namespace Tela
                 if (processoAtual.ExitCode != 0)
                 {
                     btnIniciar.Content = "Iniciar";
-                    MessageBox.Show($"O processo falhou!\n\nVerifique o Terminal para ver o motivo exato do erro.");
+                    System.Windows.MessageBox.Show($"O processo falhou!\n\nVerifique o Terminal para ver o motivo exato do erro.");
                     return;
                 }
                 btnIniciar.Content = "Iniciar";
-                MessageBox.Show("Processo finalizado com sucesso!");
+                System.Windows.MessageBox.Show("Processo finalizado com sucesso!");
             }
             catch (Exception ex)
             {
                 btnSair.IsEnabled = true;
-                MessageBox.Show($"ERRO ao executar o processo. \n{ex.Message}");
+                System.Windows.MessageBox.Show($"ERRO ao executar o processo. \n{ex.Message}");
                 return;
             }
         }
         private void btnSair_Click(object sender, RoutedEventArgs e)
         {
-            Application.Current.Shutdown();
+            fechamentoSeguro = true;
+            System.Windows.Application.Current.Shutdown();
         }
 
         private void rbFirebird25_Checked(object sender, RoutedEventArgs e)
@@ -258,7 +272,7 @@ namespace Tela
             txtNomeBanco.Visibility = Visibility.Visible;
 
             lblSenha.Visibility = Visibility.Visible;
-            txtSenha.Visibility = Visibility.Visible;
+            panelSenha.Visibility = Visibility.Visible;
 
             lblDestino.Visibility = Visibility.Collapsed;
             txtDestinoPath.Visibility = Visibility.Collapsed;
@@ -271,7 +285,7 @@ namespace Tela
             btnBuscarVersao.Visibility = Visibility.Collapsed;
 
             lblSenha.Visibility = Visibility.Collapsed;
-            txtSenha.Visibility = Visibility.Collapsed;
+            panelSenha.Visibility = Visibility.Collapsed;
 
             lblNomeBanco.Visibility = Visibility.Collapsed;
             txtNomeBanco.Visibility = Visibility.Collapsed;
@@ -279,6 +293,36 @@ namespace Tela
             lblDestino.Visibility = Visibility.Visible;
             txtDestinoPath.Visibility = Visibility.Visible;
             btnBuscarDestino.Visibility = Visibility.Visible;
+        }
+        private void btnVerSenha_Click(object sender, RoutedEventArgs e)
+        {
+            if (btnVerSenha.IsChecked == true)
+            {
+                txtSenhaVisivel.Text = pbSenha.Password;
+                pbSenha.Visibility = Visibility.Collapsed;
+                txtSenhaVisivel.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                pbSenha.Password = txtSenhaVisivel.Text;
+                txtSenhaVisivel.Visibility = Visibility.Collapsed;
+                pbSenha.Visibility = Visibility.Visible;
+            }
+        }
+        private string ObterSenhaAtual()
+        {
+            return pbSenha.Visibility == Visibility.Visible ? pbSenha.Password : txtSenhaVisivel.Text;
+        }
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (!fechamentoSeguro)
+            {
+                e.Cancel = true;
+                this.Hide();                 
+                iconeBandeja.Visible = true;
+
+                iconeBandeja.ShowBalloonTip(2000, "Minimizado", "O sistema continua rodando em segundo plano. Clique duplo para abrir.", System.Windows.Forms.ToolTipIcon.Info);
+            }
         }
     }
 }
