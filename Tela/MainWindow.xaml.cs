@@ -26,7 +26,25 @@ namespace Tela
         {
             InitializeComponent();
             this.DataContext = new MainViewModel();
-        }
+
+            timerTerminal = new System.Windows.Threading.DispatcherTimer();
+            timerTerminal.Interval = TimeSpan.FromMilliseconds(100); // 10 vezes por segundo
+            timerTerminal.Tick += (s, args) =>
+            {
+                if (filaLogs.IsEmpty) return;
+
+                StringBuilder sb = new StringBuilder();
+                while (filaLogs.TryDequeue(out string linha))
+                {
+                    sb.AppendLine(linha);
+                }
+                txtTerminal.AppendText(sb.ToString());
+                txtTerminal.ScrollToEnd();
+            };
+         }
+
+        private System.Windows.Threading.DispatcherTimer timerTerminal;
+        private System.Collections.Concurrent.ConcurrentQueue<string> filaLogs = new System.Collections.Concurrent.ConcurrentQueue<string>();
 
         private void btnBuscarOrigem_Click(object sender, RoutedEventArgs e)
         {
@@ -142,22 +160,21 @@ namespace Tela
                 config.EnvironmentVariables["PGPASSWORD"] = txtSenha.Text;
             }
 
-            txtTerminal.Clear();
+            //txtTerminal.Clear();
 
             try
             {
                 processoAtual = new Process();
                 processoAtual.StartInfo = config;
 
+                filaLogs.Clear();
+                timerTerminal.Start();
+
                 processoAtual.OutputDataReceived += (s, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Data))
                     {
-                        Dispatcher.Invoke(() =>
-                        {
-                            txtTerminal.AppendText(e.Data + Environment.NewLine);
-                            txtTerminal.ScrollToEnd();
-                        });
+                        filaLogs.Enqueue(e.Data);
                     }
                 };
 
@@ -165,11 +182,7 @@ namespace Tela
                 {
                     if (!string.IsNullOrEmpty(e.Data))
                     {
-                        Dispatcher.Invoke(() =>
-                        {
-                            txtTerminal.AppendText(e.Data + Environment.NewLine);
-                            txtTerminal.ScrollToEnd();
-                        });
+                        filaLogs.Enqueue(e.Data);
                     }
                 };
 
@@ -184,6 +197,19 @@ namespace Tela
                 btnSair.IsEnabled = false;
 
                 await processoAtual.WaitForExitAsync();
+
+                timerTerminal.Stop();
+
+                StringBuilder resto = new StringBuilder();
+                while (filaLogs.TryDequeue(out string linha))
+                {
+                    resto.Append(linha);
+                }
+                if (resto.Length > 0)
+                {
+                    txtTerminal.AppendText(resto.ToString());
+                    txtTerminal.ScrollToEnd();
+                }
 
                 btnSair.IsEnabled = true;
 
