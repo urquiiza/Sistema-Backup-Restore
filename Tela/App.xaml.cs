@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace Tela
+namespace Backup_Restore
 {
     /// <summary>
     /// Interaction logic for App.xaml

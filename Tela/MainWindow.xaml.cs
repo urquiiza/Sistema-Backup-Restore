@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using Backup_Restore;
+using Microsoft.Win32;
+using System.Diagnostics;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,11 +11,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Backup_Restore;
-using Microsoft.Win32;
-using Tela.ViewModels;
 
-namespace Tela
+namespace Backup_Restore
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -27,7 +26,6 @@ namespace Tela
         public MainWindow()
         {
             InitializeComponent();
-            this.DataContext = new MainViewModel();
 
             timerTerminal = new System.Windows.Threading.DispatcherTimer();
             timerTerminal.Interval = TimeSpan.FromMilliseconds(100); // 10 vezes por segundo
@@ -45,7 +43,7 @@ namespace Tela
             };
 
             iconeBandeja = new System.Windows.Forms.NotifyIcon();
-            iconeBandeja.Icon = System.Drawing.Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            iconeBandeja.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Environment.ProcessPath);
             iconeBandeja.Text = "HOS - Backup e Restore";
 
             iconeBandeja.DoubleClick += (s, args) =>

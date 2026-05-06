@@ -5,7 +5,7 @@ VisualStudioVersion = 17.14.36811.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backup Restore", "Backup Restore\Backup Restore.csproj", "{23E9AFEE-04C2-4C94-8E2F-F7E2B57C19C0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tela", "Tela\Tela.csproj", "{2E8F4D62-0F68-4E67-8C97-47407AC1E49D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backup-Restore", "Tela\Backup-Restore.csproj", "{2E8F4D62-0F68-4E67-8C97-47407AC1E49D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
