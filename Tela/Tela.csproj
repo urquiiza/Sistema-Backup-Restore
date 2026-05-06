@@ -10,10 +10,12 @@
 
   <ItemGroup>
     <None Remove="Resource\dromi-hos.png" />
+    <None Remove="Resource\hos-farma.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Resource\dromi-hos.png" />
+    <Resource Include="Resource\hos-farma.png" />
   </ItemGroup>
 
 </Project>

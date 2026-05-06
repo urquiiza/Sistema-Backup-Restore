@@ -1,4 +1,6 @@
 ﻿<Window x:Class="Tela.MainWindow"
+        TextElement.FontFamily="Segoe UI"
+        TextElement.Foreground="#333333"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -7,70 +9,186 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Tela"
         mc:Ignorable="d"
-        Title="HOS - Backup Restore" Height="450" Width="375">
+        Title="HOS - Backup Restore" Height="450" Width="375"
+        Icon="/Resource/hos-farma.png">
     <Window.Background>
         <ImageBrush ImageSource="/Resource/dromi-hos.png" Opacity="1"  />
     </Window.Background>
-    <TabControl x:Name="AbasMenu">
-        <TabItem Header="Configurações">
-            <StackPanel Margin="20">
-                <TextBlock Margin="5,0,0,0" Text="Selecione o Banco de Dados:" FontWeight="Bold" FontFamily="Arial"/>
-                <StackPanel Orientation="Horizontal" Margin="5,15,0,20" >
-                    <RadioButton Name="rbFirebird25" Content="Firebird 2.5" GroupName="Banco" Margin="0,0,10,0" IsChecked="True" Checked=" rbFirebird25_Checked" ></RadioButton>
-                    <RadioButton Name="rbFirebird40" Content="Firebird 4.0" GroupName="Banco" Margin="0,0,10,0"  Checked="rbFirebird40_Checked" ></RadioButton>
-                    <RadioButton Name ="rbPostgres" Content="Postgres" GroupName="Banco" Checked="rbPostgres_Checked" Unchecked="rbPostgres_Unchecked" ></RadioButton>
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="#315C85"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                            CornerRadius="5" 
+                            Padding="10,5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#447AAB"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Padding" Value="5,0,0,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border CornerRadius="4" 
+                        BorderBrush="{TemplateBinding BorderBrush}" 
+                        BorderThickness="{TemplateBinding BorderThickness}" 
+                        Background="{TemplateBinding Background}">
+                            <ScrollViewer x:Name="PART_ContentHost"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="#315C85"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="Border" 
+                        Background="Transparent" 
+                        BorderBrush="#315C85" 
+                        BorderThickness="0,0,0,2" 
+                        Margin="5,0,5,0" 
+                        Padding="15,8" 
+                        CornerRadius="5,5,0,0">
+
+                            <ContentPresenter x:Name="ContentSite"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Center"
+                                      ContentSource="Header"
+                                      RecognizesAccessKey="True"
+                                      TextElement.Foreground="#315C85"/>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#315C85"/>
+                                <Setter TargetName="Border" Property="BorderThickness" Value="0"/>
+                                <Setter TargetName="ContentSite" Property="TextElement.Foreground" Value="White"/>
+                            </Trigger>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#E0EBF5"/>
+                            </Trigger>
+
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsSelected" Value="True"/>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Border" Property="Background" Value="#315C85"/>
+                                <Setter TargetName="ContentSite" Property="TextElement.Foreground" Value="White"/>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <TabControl x:Name="AbasMenu" Background="Transparent" BorderThickness="0" Margin="0,10,0,0">
+        <TabItem Header="Configurações" Background="Transparent">
+            <Grid Margin="15" Background="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="0,0,0,10" HorizontalAlignment="Center">
+                        <TextBlock Margin="5,0,0,0" HorizontalAlignment="Left" Text="Selecione o Banco de Dados:" FontWeight="SemiBold"/>
+                        <StackPanel Orientation="Horizontal" Margin="5,15,0,20" HorizontalAlignment="Center">
+                            <RadioButton Name="rbFirebird25" Content="Firebird 2.5" GroupName="Banco" Margin="0,0,10,0" IsChecked="True" Checked=" rbFirebird25_Checked" ></RadioButton>
+                            <RadioButton Name="rbFirebird40" Content="Firebird 4.0" GroupName="Banco" Margin="0,0,10,0"  Checked="rbFirebird40_Checked" ></RadioButton>
+                            <RadioButton Name ="rbPostgres" Content="Postgres" GroupName="Banco" Checked="rbPostgres_Checked" Unchecked="rbPostgres_Unchecked" ></RadioButton>
+                        </StackPanel>
+
+                        <TextBlock Text="Caminho do Banco Origem:" Margin="0,4,0,0" HorizontalAlignment="Left" FontWeight="SemiBold" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <TextBox Name="txtOrigemPath" Height="25" Margin="0,5,5,0" Width="210" />
+                            <Button Name="btnBuscarOrigem" Content="Procurar..." Height="25" Margin="0,5,0,0" Width="80" HorizontalAlignment="Left" Click="btnBuscarOrigem_Click" />
+                        </StackPanel>
+
+                        <TextBlock Name="lblDestino" Text="Caminho Destino do Banco:" Margin="0,4,0,0" HorizontalAlignment="Left" FontWeight="SemiBold" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <TextBox Name="txtDestinoPath" Height="25" Margin="0,5,5,0" Width="210" SnapsToDevicePixels="True"/>
+                            <Button Name="btnBuscarDestino" Content="Procurar..." Height="25" Margin="0,5,0,0" Width="80" HorizontalAlignment="Left" Click="btnBuscarDestino_Click" />
+                        </StackPanel>
+
+                        <TextBlock Name="lblVersao" Text="Caminho Versão Postgres:" Margin="0,4,0,0" HorizontalAlignment="Left" FontWeight="SemiBold" Visibility="Collapsed" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <TextBox Name="txtVersao" Height="25" Margin="0,5,5,0" Width="210" SnapsToDevicePixels="True" Visibility="Collapsed"/>
+                            <Button Name="btnBuscarVersao" Content="Procurar..." Height="25" Margin="0,5,0,0" Width="80" HorizontalAlignment="Left" Click="btnBuscarVersao_Click" Visibility="Collapsed"/>
+                        </StackPanel>
+
+                        <TextBlock Name="lblNomeBanco" Text="Nome do Banco:" Margin="5,10,0,0" HorizontalAlignment="Center" FontWeight="SemiBold" Visibility="Collapsed" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBox Name="txtNomeBanco" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
+                        </StackPanel>
+
+                        <TextBlock Name="lblSenha" Text="Senha Banco Postgres:" Margin="5,10,0,0" HorizontalAlignment="Center" FontWeight="SemiBold" Visibility="Collapsed" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBox Name="txtSenha" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
+                    <Button Name="btnIniciar" Content="Iniciar" Width="130" Margin="0,0,10,0" Click="btnIniciar_Click" />
+                    <Button Name="btnSair" Content="Sair" Width="130" Click="btnSair_Click" />
                 </StackPanel>
 
-                <TextBlock Text="Caminho do Banco Origem:" Margin="5,10,0,0" FontWeight="Bold" />
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBox Name="txtOrigemPath" Height="20" Margin="0,5,5,0" Width="250" />
-                    <Button Name="btnBuscarOrigem" Content="Procurar..." Height="20" Margin="0,5,0,0" Width="60" HorizontalAlignment="Left" Click="btnBuscarOrigem_Click" />
-                </StackPanel>
-
-                <TextBlock Name="lblDestino" Text="Caminho Destino do Banco:" Margin="5,10,0,0" FontWeight="Bold" />
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBox Name="txtDestinoPath" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True"/>
-                    <Button Name="btnBuscarDestino" Content="Procurar..." Height="20" Margin="0,5,0,0" Width="60" HorizontalAlignment="Left" Click="btnBuscarDestino_Click" />
-                </StackPanel>
-
-                <TextBlock Name="lblVersao" Text="Caminho Versão Postgres:" Margin="5,10,0,0" FontWeight="Bold" Visibility="Collapsed" />
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBox Name="txtVersao" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
-                    <Button Name="btnBuscarVersao" Content="Procurar..." Height="20" Margin="0,5,0,0" Width="60" HorizontalAlignment="Left" Click="btnBuscarVersao_Click" Visibility="Collapsed"/>
-                </StackPanel>
-
-                <TextBlock Name="lblNomeBanco" Text="Nome do Banco:" Margin="5,10,0,0" FontWeight="Bold" Visibility="Collapsed" />
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBox Name="txtNomeBanco" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
-                </StackPanel>
-
-                <TextBlock Name="lblSenha" Text="Senha Banco Postgres:" Margin="5,10,0,0" FontWeight="Bold" Visibility="Collapsed" />
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBox Name="txtSenha" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal" Margin="0,80,13,0" HorizontalAlignment="Center" >
-                    <Button Name="btnIniciar" Content="Iniciar" Width="130" Margin="10,0,0,0" Click="btnIniciar_Click" />
-                    <Button Name="btnSair" Content="Sair" Width="130" Margin="5,0,0,0" Click="btnSair_Click" />
-                </StackPanel>
-            </StackPanel>
+            </Grid>
         </TabItem>
         <TabItem Header="Monitor">
-            <Grid Background="Black">
-                <Grid Background="#252526">
-                    <TextBox x:Name="txtTerminal" 
-                         FontFamily="Consolas" 
-                         FontSize="14"
-                         Background="#1E1E1E" 
-                         Foreground="#4AF626" 
-                         IsReadOnly="True" 
-                         TextWrapping="Wrap" 
-                         VerticalScrollBarVisibility="Auto" 
-                         BorderThickness="1" 
-                         BorderBrush="#3E3E42"
-                         Margin="10"
-                         Text="Aguardando inicialização do processo...&#x0A;"/>
-                </Grid>
+            <Grid Margin="20">
+                <TextBox x:Name="txtTerminal" 
+                 Height="Auto" 
+                 VerticalAlignment="Stretch" 
+                 HorizontalAlignment="Stretch"
+                 VerticalContentAlignment="Top"
+                 Background="#1E1E1E" 
+                 Foreground="#4AF626" 
+                 FontFamily="Consolas" 
+                 FontSize="14" 
+                 TextWrapping="Wrap" 
+                 AcceptsReturn="True" 
+                 VerticalScrollBarVisibility="Auto" 
+                 IsReadOnly="True"
+                 Padding="10"
+                 BorderThickness="0"
+                 Text="Aguardando inicialização do processo...&#x0A;"/>
             </Grid>
         </TabItem>
     </TabControl>

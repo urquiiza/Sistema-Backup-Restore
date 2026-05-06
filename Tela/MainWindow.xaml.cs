@@ -65,7 +65,7 @@ namespace Tela
 
             dlg.Title = "Selecione o pg_restore.exe";
             dlg.Filter = "Executável do PostgreSQL (pg_restore.exe)|pg_restore.exe|Arquivos Executáveis (*.exe)|*.exe";
-            
+
             if (dlg.ShowDialog() == true)
             {
                 string caminhoCompleto = dlg.FileName;
@@ -142,6 +142,8 @@ namespace Tela
                 config.EnvironmentVariables["PGPASSWORD"] = txtSenha.Text;
             }
 
+            txtTerminal.Clear();
+
             try
             {
                 processoAtual = new Process();
@@ -151,9 +153,10 @@ namespace Tela
                 {
                     if (!string.IsNullOrEmpty(e.Data))
                     {
-                        Dispatcher.Invoke(() => {
+                        Dispatcher.Invoke(() =>
+                        {
                             txtTerminal.AppendText(e.Data + Environment.NewLine);
-                            txtTerminal.ScrollToEnd(); 
+                            txtTerminal.ScrollToEnd();
                         });
                     }
                 };
@@ -162,7 +165,8 @@ namespace Tela
                 {
                     if (!string.IsNullOrEmpty(e.Data))
                     {
-                        Dispatcher.Invoke(() => {
+                        Dispatcher.Invoke(() =>
+                        {
                             txtTerminal.AppendText(e.Data + Environment.NewLine);
                             txtTerminal.ScrollToEnd();
                         });
@@ -175,12 +179,12 @@ namespace Tela
                 processoAtual.BeginErrorReadLine();
 
                 AbasMenu.SelectedIndex = 1;
-                
+
                 btnIniciar.Content = "Cancelar";
                 btnSair.IsEnabled = false;
-                
+
                 await processoAtual.WaitForExitAsync();
-                
+
                 btnSair.IsEnabled = true;
 
                 if (canceladoPelousuario == true)
@@ -227,7 +231,7 @@ namespace Tela
             lblNomeBanco.Visibility = Visibility.Visible;
             txtNomeBanco.Visibility = Visibility.Visible;
 
-            lblSenha.Visibility = Visibility.Visible;   
+            lblSenha.Visibility = Visibility.Visible;
             txtSenha.Visibility = Visibility.Visible;
 
             lblDestino.Visibility = Visibility.Collapsed;
