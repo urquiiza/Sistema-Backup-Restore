@@ -61,7 +61,7 @@ namespace Backup_Restore
         {
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
 
-            if (rbPostgres.IsChecked == true)
+            if (cmbBanco.SelectedIndex == 2)
             {
                 dlg.Filter = "Arquivos PostgreSQL (*.dump)|*.dump";
             }
@@ -90,18 +90,14 @@ namespace Backup_Restore
 
         private void btnBuscarVersao_Click(object sender, RoutedEventArgs e)
         {
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+            Microsoft.Win32.OpenFolderDialog dlg = new Microsoft.Win32.OpenFolderDialog();
 
-            dlg.Title = "Selecione o pg_restore.exe";
-            dlg.Filter = "Executável do PostgreSQL (pg_restore.exe)|pg_restore.exe|Arquivos Executáveis (*.exe)|*.exe";
+            dlg.Title = "Pasta versao...";
 
             if (dlg.ShowDialog() == true)
             {
-                string caminhoCompleto = dlg.FileName;
-                string pastaBin = System.IO.Path.GetDirectoryName(caminhoCompleto);
-                string pastaVersao = System.IO.Path.GetDirectoryName(pastaBin);
 
-                txtVersao.Text = pastaVersao;
+                txtVersao.Text = dlg.FolderName;
             }
         }
 
@@ -109,6 +105,7 @@ namespace Backup_Restore
         {
             if (btnIniciar.Content.ToString() == "Cancelar")
             {
+
                 canceladoPelousuario = true;
                 processoAtual.Kill();
                 btnIniciar.Content = "Iniciar";
@@ -116,133 +113,95 @@ namespace Backup_Restore
                 return;
             }
 
+            if(cmbBanco.SelectedIndex == -1 || cmbAcao.SelectedIndex == -1)
+            {
+                System.Windows.MessageBox.Show("Selecione o banco de dados e a acao desejada!");
+                return;
+            }
+
             canceladoPelousuario = false;
-
-            if (string.IsNullOrEmpty(txtOrigemPath.Text))
-            {
-                System.Windows.MessageBox.Show("Selecione um arquivo de banco de dados!");
-                return;
-            }
-            if (string.IsNullOrEmpty(txtDestinoPath.Text) && rbPostgres.IsChecked == false)
-            {
-                System.Windows.MessageBox.Show("Selecione uma pasta destino!");
-                return;
-            }
-
-            string caminhoExecutavel = "";
-            string argumentosProcesso = "";
-
             string origem = txtOrigemPath.Text;
             string destino = txtDestinoPath.Text;
+            string senha = ObterSenhaAtual();
 
-            if (rbFirebird25.IsChecked == true)
+            int indexBanco = cmbBanco.SelectedIndex;
+            int indexAcao = cmbAcao.SelectedIndex;
+
+            List<ProcessStartInfo> executarProcesso = new List<ProcessStartInfo>();
+
+            if (indexBanco == 0 || indexBanco == 1)
             {
-                caminhoExecutavel = "C:\\Program Files\\Firebird\\Firebird_2_5\\bin\\gbak.exe";
-                argumentosProcesso = Comandos.Comando(origem, destino);
+                string pastaFb = indexBanco == 0 ? @"C:\Program Files\Firebird\Firebird_2_5\bin" : @"C:\Program Files\Firebird\Firebird_4_0";
+
+                if (indexAcao == 0) executarProcesso.Add(ComandosFirebird.BackupFirebird(pastaFb, origem, destino, senha));
+                else executarProcesso.Add(ComandosFirebird.RestoreFirebird(pastaFb, origem, destino, senha));
             }
-            else if (rbFirebird40.IsChecked == true)
+            else 
             {
-                caminhoExecutavel = "C:\\Program Files\\Firebird\\Firebird_4_0\\gbak.exe";
-                argumentosProcesso = Comandos.Comando(origem, destino);
-            }
-            else
-            {
-                string versao = txtVersao.Text;
+                string pastaPg = System.IO.Path.Combine(txtVersao.Text, "bin");
                 string nomeBanco = txtNomeBanco.Text;
-                string senha = ObterSenhaAtual();
 
-                caminhoExecutavel = $"{versao}\\bin\\pg_restore.exe";
-
-                argumentosProcesso = Comandos.RestorePostgres(versao, nomeBanco, senha, origem);
-            }
-
-            var config = new ProcessStartInfo
-            {
-                FileName = caminhoExecutavel,
-                Arguments = argumentosProcesso,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-
-            if (rbPostgres.IsChecked == true)
-            {
-                config.EnvironmentVariables["PGPASSWORD"] = ObterSenhaAtual();
+                if (indexAcao == 0) executarProcesso.Add(ComandosPostgres.BackupPostgres(pastaPg, nomeBanco, destino, senha));
+                else if (indexAcao == 1) executarProcesso.Add(ComandosPostgres.RestorePostgres(pastaPg, nomeBanco, origem, senha));
+                else executarProcesso.AddRange(ComandosPostgres.ManutencaoPostgres(pastaPg, nomeBanco, senha));
             }
 
             txtTerminal.Clear();
+            AbasMenu.SelectedIndex = 1;
+            btnIniciar.Content = "Cancelar";
+            btnSair.IsEnabled = false;
+            btnSair.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Gray);
+            filaLogs.Clear();
+            timerTerminal.Start();
 
             try
             {
-                processoAtual = new Process();
-                processoAtual.StartInfo = config;
-
-                filaLogs.Clear();
-                timerTerminal.Start();
-
-                processoAtual.OutputDataReceived += (s, e) =>
+                foreach (var config in executarProcesso)
                 {
-                    if (!string.IsNullOrEmpty(e.Data))
+                    if (canceladoPelousuario) break;
+
+                    processoAtual = new Process();
+                    processoAtual.StartInfo = config;
+
+                    processoAtual.OutputDataReceived += (s, args) => { if (!string.IsNullOrEmpty(args.Data)) filaLogs.Enqueue(args.Data); };
+                    processoAtual.ErrorDataReceived += (s, args) => { if (!string.IsNullOrEmpty(args.Data)) filaLogs.Enqueue(args.Data); };
+
+                    processoAtual.Start();
+                    processoAtual.BeginOutputReadLine();
+                    processoAtual.BeginErrorReadLine();
+
+                    await processoAtual.WaitForExitAsync();
+
+                    if (processoAtual.ExitCode != 0 && !canceladoPelousuario)
                     {
-                        filaLogs.Enqueue(e.Data);
+                        btnIniciar.Content = "Iniciar";
+                        btnSair.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
+                        throw new Exception("O comando falhou. Verifique o terminal para mais detalhes.");
                     }
-                };
-
-                processoAtual.ErrorDataReceived += (s, e) =>
-                {
-                    if (!string.IsNullOrEmpty(e.Data))
+                    if (canceladoPelousuario == true)
                     {
-                        filaLogs.Enqueue(e.Data);
+                        btnIniciar.Content = "Iniciar";
+                        btnSair.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
+                        System.Windows.MessageBox.Show("Operacao cancelada!");
+                        return;
                     }
-                };
 
-                processoAtual.Start();
-
-                processoAtual.BeginOutputReadLine();
-                processoAtual.BeginErrorReadLine();
-
-                AbasMenu.SelectedIndex = 1;
-
-                btnIniciar.Content = "Cancelar";
-                btnSair.IsEnabled = false;
-
-                await processoAtual.WaitForExitAsync();
+                }
 
                 timerTerminal.Stop();
 
-                StringBuilder resto = new StringBuilder();
-                while (filaLogs.TryDequeue(out string linha))
-                {
-                    resto.Append(linha);
-                }
-                if (resto.Length > 0)
-                {
-                    txtTerminal.AppendText(resto.ToString());
-                    txtTerminal.ScrollToEnd();
-                }
-
-                btnSair.IsEnabled = true;
-
-                if (canceladoPelousuario == true)
-                {
-                    return;
-                }
-
-                if (processoAtual.ExitCode != 0)
-                {
-                    btnIniciar.Content = "Iniciar";
-                    System.Windows.MessageBox.Show($"O processo falhou!\n\nVerifique o Terminal para ver o motivo exato do erro.");
-                    return;
-                }
                 btnIniciar.Content = "Iniciar";
+                btnSair.IsEnabled = true;
+                btnSair.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
                 System.Windows.MessageBox.Show("Processo finalizado com sucesso!");
             }
             catch (Exception ex)
             {
+                timerTerminal.Stop();
+                btnIniciar.Content = "Iniciar";
                 btnSair.IsEnabled = true;
-                System.Windows.MessageBox.Show($"ERRO ao executar o processo. \n{ex.Message}");
-                return;
+                btnSair.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
+                System.Windows.MessageBox.Show($"ERRO:\n{ex.Message}");
             }
         }
         private void btnSair_Click(object sender, RoutedEventArgs e)
@@ -251,47 +210,6 @@ namespace Backup_Restore
             System.Windows.Application.Current.Shutdown();
         }
 
-        private void rbFirebird25_Checked(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void rbFirebird40_Checked(object sender, RoutedEventArgs e)
-        {
-
-        }
-        private void rbPostgres_Checked(object sender, RoutedEventArgs e)
-        {
-            lblVersao.Visibility = Visibility.Visible;
-            txtVersao.Visibility = Visibility.Visible;
-            btnBuscarVersao.Visibility = Visibility.Visible;
-
-            lblNomeBanco.Visibility = Visibility.Visible;
-            txtNomeBanco.Visibility = Visibility.Visible;
-
-            lblSenha.Visibility = Visibility.Visible;
-            panelSenha.Visibility = Visibility.Visible;
-
-            lblDestino.Visibility = Visibility.Collapsed;
-            txtDestinoPath.Visibility = Visibility.Collapsed;
-            btnBuscarDestino.Visibility = Visibility.Collapsed;
-        }
-        private void rbPostgres_Unchecked(object sender, RoutedEventArgs e)
-        {
-            lblVersao.Visibility = Visibility.Collapsed;
-            txtVersao.Visibility = Visibility.Collapsed;
-            btnBuscarVersao.Visibility = Visibility.Collapsed;
-
-            lblSenha.Visibility = Visibility.Collapsed;
-            panelSenha.Visibility = Visibility.Collapsed;
-
-            lblNomeBanco.Visibility = Visibility.Collapsed;
-            txtNomeBanco.Visibility = Visibility.Collapsed;
-
-            lblDestino.Visibility = Visibility.Visible;
-            txtDestinoPath.Visibility = Visibility.Visible;
-            btnBuscarDestino.Visibility = Visibility.Visible;
-        }
         private void btnVerSenha_Click(object sender, RoutedEventArgs e)
         {
             if (btnVerSenha.IsChecked == true)
@@ -320,6 +238,71 @@ namespace Backup_Restore
                 iconeBandeja.Visible = true;
 
                 iconeBandeja.ShowBalloonTip(2000, "Minimizado", "O sistema continua rodando em segundo plano. Clique duplo para abrir.", System.Windows.Forms.ToolTipIcon.Info);
+            }
+        }
+        private void cmbBanco_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cmbAcao == null || lblAcao == null) return;
+
+            lblAcao.Visibility = Visibility.Visible;
+            cmbAcao.Visibility = Visibility.Visible;
+
+            if (cmbBanco.SelectedIndex == 2)
+            {
+                cbiManutencao.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                cbiManutencao.Visibility = Visibility.Collapsed;
+
+                if (cmbAcao.SelectedIndex == 2) cmbAcao.SelectedIndex = 0;
+            }
+
+            AtualizarVisibilidadeCampos();
+        }
+        private void cmbAcao_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            AtualizarVisibilidadeCampos();
+        }
+        private void AtualizarVisibilidadeCampos()
+        {
+            if (cmbBanco == null || cmbAcao == null) return;
+
+            lblVersao.Visibility = Visibility.Collapsed;
+            txtVersao.Visibility = Visibility.Collapsed;
+            btnBuscarVersao.Visibility = Visibility.Collapsed;
+
+            lblNomeBanco.Visibility = Visibility.Collapsed;
+            txtNomeBanco.Visibility = Visibility.Collapsed;
+
+            lblSenha.Visibility = Visibility.Collapsed;
+            panelSenha.Visibility = Visibility.Collapsed;
+
+            if (cmbBanco.SelectedIndex == 2)
+            {
+                lblVersao.Visibility = Visibility.Visible;
+                txtVersao.Visibility = Visibility.Visible;
+                btnBuscarVersao.Visibility = Visibility.Visible;
+
+                lblNomeBanco.Visibility = Visibility.Visible;
+                txtNomeBanco.Visibility = Visibility.Visible;
+
+                lblSenha.Visibility = Visibility.Visible;
+                panelSenha.Visibility = Visibility.Visible;
+            }
+
+            if (cmbAcao.SelectedIndex == 0 || cmbAcao.SelectedIndex == 1) // BACKUP/RESTORE
+            {
+                lblDestino.Text = "Pasta de Destino para Salvar:";
+                lblDestino.Visibility = Visibility.Visible;
+                txtDestinoPath.Visibility = Visibility.Visible;
+                btnBuscarDestino.Visibility = Visibility.Visible;
+            }
+            else // MANUTENÇÃO
+            {
+                lblDestino.Visibility = Visibility.Collapsed;
+                txtDestinoPath.Visibility = Visibility.Collapsed;
+                btnBuscarDestino.Visibility = Visibility.Collapsed;
             }
         }
     }

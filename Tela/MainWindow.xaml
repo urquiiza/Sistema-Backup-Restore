@@ -128,13 +128,20 @@
                 </Grid.RowDefinitions>
                 <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="0,0,0,10" HorizontalAlignment="Center">
-                        <TextBlock Margin="5,0,0,0" HorizontalAlignment="Left" Text="Selecione o Banco de Dados:" FontWeight="SemiBold"/>
-                        <StackPanel Orientation="Horizontal" Margin="5,15,0,20" HorizontalAlignment="Center">
-                            <RadioButton Name="rbFirebird25" Content="Firebird 2.5" GroupName="Banco" Margin="0,0,10,0" IsChecked="True" Checked=" rbFirebird25_Checked" ></RadioButton>
-                            <RadioButton Name="rbFirebird40" Content="Firebird 4.0" GroupName="Banco" Margin="0,0,10,0"  Checked="rbFirebird40_Checked" ></RadioButton>
-                            <RadioButton Name ="rbPostgres" Content="Postgres" GroupName="Banco" Checked="rbPostgres_Checked" Unchecked="rbPostgres_Unchecked" ></RadioButton>
-                        </StackPanel>
+                        <TextBlock Text="Banco de Dados:" HorizontalAlignment="Center" Margin="0,5,0,5" FontWeight="SemiBold"/>
+                        <ComboBox Name="cmbBanco" SelectionChanged="cmbBanco_SelectionChanged" Margin="10,0,10,10" Height="25">
+                            <ComboBoxItem Content="Firebird 2.5"/>
+                            <ComboBoxItem Content="Firebird 4.0"/>
+                            <ComboBoxItem Content="PostgresSQL"/>
+                        </ComboBox>
 
+                        <TextBlock Name="lblAcao" Text="O que deseja fazer?" HorizontalAlignment="Center" Margin="0,0,0,5" FontWeight="SemiBold" Visibility="Collapsed" />
+                        <ComboBox Name="cmbAcao" SelectionChanged="cmbAcao_SelectionChanged" Margin="10,0,10,10" Height="25" Visibility="Collapsed">
+                            <ComboBoxItem Content="Backup"/>
+                            <ComboBoxItem Content="Restore"/>
+                            <ComboBoxItem Name="cbiManutencao" Content="Manutenção" Visibility="Collapsed"/>
+                        </ComboBox>
+                        
                         <TextBlock Text="Caminho do Banco Origem:" Margin="0,4,0,0" HorizontalAlignment="Left" FontWeight="SemiBold" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                             <TextBox Name="txtOrigemPath" Height="25" Margin="0,5,5,0" Width="210" />
@@ -153,19 +160,21 @@
                             <Button Name="btnBuscarVersao" Content="Procurar..." Height="25" Margin="0,5,0,0" Width="80" HorizontalAlignment="Left" Click="btnBuscarVersao_Click" Visibility="Collapsed"/>
                         </StackPanel>
 
-                        <TextBlock Name="lblNomeBanco" Text="Nome do Banco:" Margin="5,10,0,0" HorizontalAlignment="Center" FontWeight="SemiBold" Visibility="Collapsed" />
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBox Name="txtNomeBanco" Height="20" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
+                        <TextBlock Name="lblNomeBanco" Text="Nome do Banco:" Margin="5,10,0,0" HorizontalAlignment="Left" FontWeight="SemiBold" Visibility="Collapsed" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <TextBox Name="txtNomeBanco" Height="25" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
                         </StackPanel>
 
-                        <StackPanel Margin="0,5">
-                            <TextBlock Name="lblSenha" Text="Senha Banco Postgres:" HorizontalAlignment="Center" Margin="0,0,0,5" FontWeight="SemiBold" Visibility="Collapsed"/>
+                        <StackPanel Margin="0,5" HorizontalAlignment="Left" Width="280">
+                            <TextBlock Name="lblSenha" Text="Senha Banco Postgres:" HorizontalAlignment="Left" Margin="0,0,0,5" FontWeight="SemiBold" Visibility="Collapsed"/>
                             <DockPanel Name="panelSenha" Visibility="Collapsed">
                                 <ToggleButton Name="btnVerSenha" Content="👁" DockPanel.Dock="Right" Width="35" Click="btnVerSenha_Click" ToolTip="Ver/Ocultar Senha"/>
-                                <Grid>
-                                    <PasswordBox Name="pbSenha" Height="20" Padding="5,0,0,0" Width="220" VerticalContentAlignment="Center" PasswordChar="*"/>
-                                    <TextBox Name="txtSenhaVisivel" Height="20" Width="220" VerticalContentAlignment="Center" Visibility="Collapsed"/>
-                                </Grid>
+                                <Border CornerRadius="5" BorderBrush="#CCCCCC" BorderThickness="1" Height="25">
+                                    <Grid>
+                                        <PasswordBox Name="pbSenha" BorderThickness="0" Background="Transparent" Padding="5,0,0,0" VerticalContentAlignment="Center" PasswordChar="*"/>
+                                        <TextBox Name="txtSenhaVisivel" BorderThickness="0" Background="Transparent" Padding="5,0,0,0" VerticalContentAlignment="Center" Visibility="Collapsed"/>
+                                    </Grid>
+                                </Border>
                             </DockPanel>
                         </StackPanel>
                     </StackPanel>

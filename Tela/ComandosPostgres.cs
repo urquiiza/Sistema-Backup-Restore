@@ -12,12 +12,21 @@ namespace Backup_Restore
     {
         private const string VARIAVEL_SENHA = "PGPASSWORD";
 
-        public static ProcessStartInfo BackupPostgres(string pastaExecutavel, string nomeBanco, string arquivoDestino, string senha)
+        public static ProcessStartInfo BackupPostgres(string pastaExecutavel, string nomeBanco, string caminhoDestino, string senha)
         {
-            string executavel = Path.Combine(pastaExecutavel, "pg_dump.exe");
-            string argumentos = $"-U postgres -d \"{nomeBanco}\" -F c -f \"{arquivoDestino}\"";
+            string arquivoDestino = caminhoDestino;
 
-            return ConfiguradorProcesso.CriarBase(executavel, argumentos, VARIAVEL_SENHA, senha) ;
+            if (Directory.Exists(caminhoDestino))
+            {
+                string nomeBase = string.IsNullOrWhiteSpace(nomeBanco) ? "Backup_Postgres" : nomeBanco;
+
+                arquivoDestino = Path.Combine(caminhoDestino, nomeBase + ".backup");
+            }
+
+            string executavel = Path.Combine(pastaExecutavel, "pg_dump.exe");
+            string argumentos = $"-U postgres -F c -d \"{nomeBanco}\" -f \"{arquivoDestino}\" -v";
+
+            return ConfiguradorProcesso.CriarBase(executavel, argumentos, VARIAVEL_SENHA, senha);
         }
 
         public static ProcessStartInfo RestorePostgres(string pastaExecutavel, string nomeBanco, string caminhoOrigem, string senha)
