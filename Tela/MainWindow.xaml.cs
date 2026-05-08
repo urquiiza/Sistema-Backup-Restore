@@ -65,9 +65,9 @@ namespace Backup_Restore
             {
                 dlg.Filter = "Arquivos PostgreSQL (*.dump)|*.dump";
             }
-            else
+            else 
             {
-                dlg.Filter = "Arquivos Firebird (*.fbk;*.fdb)|*.fbk;*.fdb|Todos os arquivos|*.*";
+                dlg.Filter = "Arquivos Firebird (*.fbk;*.fdb)|*.fbk;*.fdb";
             }
 
             if (dlg.ShowDialog() == true)
@@ -92,11 +92,11 @@ namespace Backup_Restore
         {
             Microsoft.Win32.OpenFolderDialog dlg = new Microsoft.Win32.OpenFolderDialog();
 
-            dlg.Title = "Pasta versao...";
+            dlg.DefaultDirectory = "C:\\Program Files\\";
+            dlg.FolderName = dlg.DefaultDirectory + "PostgreSQL";
 
             if (dlg.ShowDialog() == true)
             {
-
                 txtVersao.Text = dlg.FolderName;
             }
         }
@@ -117,6 +117,37 @@ namespace Backup_Restore
             {
                 System.Windows.MessageBox.Show("Selecione o banco de dados e a acao desejada!");
                 return;
+            }
+            if (cmbBanco.SelectedIndex >= 0)
+            {
+                if (string.IsNullOrEmpty(txtOrigemPath.Text))
+                {
+                    System.Windows.MessageBox.Show("Selecione o banco origem!");
+                    return;
+                }
+                else if (string.IsNullOrEmpty(txtDestinoPath.Text) && cmbAcao.SelectedIndex != 2)
+                {
+                    System.Windows.MessageBox.Show("Selecione o destino!");
+                    return;
+                }
+                if (cmbBanco.SelectedIndex == 2)
+                {
+                    if (string.IsNullOrEmpty(txtVersao.Text))
+                    {
+                        System.Windows.MessageBox.Show("Selecione a versão PostgresSQL!");
+                        return;
+                    }
+                    if (string.IsNullOrEmpty(txtNomeBanco.Text))
+                    {
+                        System.Windows.MessageBox.Show("Informe o nome do banco!");
+                        return;
+                    }
+                    if (string.IsNullOrEmpty(ObterSenhaAtual()))
+                    {
+                        System.Windows.MessageBox.Show("Informe a senha para prosseguir!");
+                        return;
+                    }
+                }
             }
 
             canceladoPelousuario = false;
@@ -158,8 +189,6 @@ namespace Backup_Restore
             {
                 foreach (var config in executarProcesso)
                 {
-                    if (canceladoPelousuario) break;
-
                     processoAtual = new Process();
                     processoAtual.StartInfo = config;
 
@@ -185,7 +214,6 @@ namespace Backup_Restore
                         System.Windows.MessageBox.Show("Operacao cancelada!");
                         return;
                     }
-
                 }
 
                 timerTerminal.Stop();
@@ -266,6 +294,11 @@ namespace Backup_Restore
         }
         private void AtualizarVisibilidadeCampos()
         {
+            lblDestino.Text = "Pasta de Destino para Salvar:";
+            lblDestino.Visibility = Visibility.Visible;
+            txtDestinoPath.Visibility = Visibility.Visible;
+            btnBuscarDestino.Visibility = Visibility.Visible;
+
             if (cmbBanco == null || cmbAcao == null) return;
 
             lblVersao.Visibility = Visibility.Collapsed;
@@ -290,15 +323,7 @@ namespace Backup_Restore
                 lblSenha.Visibility = Visibility.Visible;
                 panelSenha.Visibility = Visibility.Visible;
             }
-
-            if (cmbAcao.SelectedIndex == 0 || cmbAcao.SelectedIndex == 1) // BACKUP/RESTORE
-            {
-                lblDestino.Text = "Pasta de Destino para Salvar:";
-                lblDestino.Visibility = Visibility.Visible;
-                txtDestinoPath.Visibility = Visibility.Visible;
-                btnBuscarDestino.Visibility = Visibility.Visible;
-            }
-            else // MANUTENÇÃO
+            if (cmbAcao.SelectedIndex == 2)
             {
                 lblDestino.Visibility = Visibility.Collapsed;
                 txtDestinoPath.Visibility = Visibility.Collapsed;

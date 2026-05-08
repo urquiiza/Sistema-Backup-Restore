@@ -168,7 +168,7 @@
                         <StackPanel Margin="0,5" HorizontalAlignment="Left" Width="280">
                             <TextBlock Name="lblSenha" Text="Senha Banco Postgres:" HorizontalAlignment="Left" Margin="0,0,0,5" FontWeight="SemiBold" Visibility="Collapsed"/>
                             <DockPanel Name="panelSenha" Visibility="Collapsed">
-                                <ToggleButton Name="btnVerSenha" Content="👁" DockPanel.Dock="Right" Width="35" Click="btnVerSenha_Click" ToolTip="Ver/Ocultar Senha"/>
+                                <ToggleButton Name="btnVerSenha" Content="👁" DockPanel.Dock="Right" Width="35" Click="btnVerSenha_Click" ToolTip="Ver/Ocultar Senha" SnapsToDevicePixels="False" RenderOptions.BitmapScalingMode="HighQuality" RenderOptions.EdgeMode="Aliased"/>
                                 <Border CornerRadius="5" BorderBrush="#CCCCCC" BorderThickness="1" Height="25">
                                     <Grid>
                                         <PasswordBox Name="pbSenha" BorderThickness="0" Background="Transparent" Padding="5,0,0,0" VerticalContentAlignment="Center" PasswordChar="*"/>
