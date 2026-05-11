@@ -1,4 +1,5 @@
 ﻿<Window x:Class="Backup_Restore.MainWindow"
+        Loaded="Window_Loaded"
         TextElement.FontFamily="Segoe UI"
         TextElement.Foreground="#333333"
         ResizeMode="NoResize"

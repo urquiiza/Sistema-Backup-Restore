@@ -1,6 +1,7 @@
 ﻿using Backup_Restore;
 using Microsoft.Win32;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,6 +20,48 @@ namespace Backup_Restore
     /// </summary>
     public partial class MainWindow : Window
     {
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            string pastaArquivo = ".hos\\config";
+            string pastaUsuario = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string arquivoConfig = System.IO.Path.Combine(pastaUsuario, pastaArquivo);
+
+            if (System.IO.File.Exists(arquivoConfig))
+            {
+                string textoArquivo = System.IO.File.ReadAllText(arquivoConfig);
+                ConfigAutomatica configCarregada = System.Text.Json.JsonSerializer.Deserialize<ConfigAutomatica>(textoArquivo);
+
+                string versaoBancoFb = configCarregada.Configuracoes.BANCO_DADOS_VERSAO.Split('.')[0];
+                string extBanco = System.IO.Path.GetExtension(configCarregada.Configuracoes.NOME_BANCODADOS).ToLower();
+                string caminhoBancoAut = System.IO.Path.Combine(configCarregada.Configuracoes.BANCO_REMOTO, configCarregada.Configuracoes.NOME_BANCODADOS);
+                string bancoPostgres = configCarregada.Configuracoes.NOME_BANCODADOS;
+
+                if (versaoBancoFb == "2" )
+                {
+                    cmbBanco.SelectedIndex = 0;
+                    txtOrigemPath.Text = caminhoBancoAut;
+                }
+                else if (versaoBancoFb == "4")
+                {
+                    cmbBanco.SelectedIndex = 1;
+                    txtOrigemPath.Text = caminhoBancoAut;
+                }
+                else
+                {
+                    cmbBanco.SelectedIndex = 2;
+                    txtNomeBanco.Text = bancoPostgres;
+                }
+                if (extBanco == ".fdb")
+                {
+                    cmbAcao.SelectedIndex = 0;
+                }
+                else if (extBanco == ".fbk")
+                {
+                    cmbAcao.SelectedIndex = 1;
+                }
+                else { cmbAcao.SelectedIndex = -1; }
+            }
+        }
         private Process processoAtual;
         private bool canceladoPelousuario = false;
         private System.Windows.Forms.NotifyIcon iconeBandeja;
