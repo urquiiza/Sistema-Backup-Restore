@@ -29,12 +29,19 @@ namespace Backup_Restore
             return ConfiguradorProcesso.CriarBase(executavel, argumentos, VARIAVEL_SENHA, senha);
         }
 
-        public static ProcessStartInfo RestorePostgres(string pastaExecutavel, string nomeBanco, string caminhoOrigem, string senha)
+        public static List<ProcessStartInfo> RestorePostgres(string pastaExecutavel, string nomeBanco, string caminhoOrigem, string senha)
         {
-            string executavel = Path.Combine(pastaExecutavel, "pg_restore.exe");
-            string argumentos = $"-U postgres -d \"{nomeBanco}\" -v \"{caminhoOrigem}\"";
+            var processos = new List<ProcessStartInfo>();
 
-            return ConfiguradorProcesso.CriarBase(executavel, argumentos, VARIAVEL_SENHA, senha);
+            string execCreate = Path.Combine(pastaExecutavel, "psql.exe");
+            string argCreate = $"-U postgres -c \"CREATE DATABASE \\\"{nomeBanco}\\\";\"";
+            processos.Add(ConfiguradorProcesso.CriarBase(execCreate, argCreate, VARIAVEL_SENHA, senha));
+
+            string execRestore = Path.Combine(pastaExecutavel, "pg_restore.exe");
+            string argRestore = $"-U postgres -d \"{nomeBanco}\" -v \"{caminhoOrigem}\"";
+            processos.Add(ConfiguradorProcesso.CriarBase(execRestore, argRestore, VARIAVEL_SENHA, senha));
+
+            return processos;
         }
 
         public static List<ProcessStartInfo> ManutencaoPostgres(string pastaExecutavel, string nomeBanco, string senha)

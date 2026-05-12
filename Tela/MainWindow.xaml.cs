@@ -31,17 +31,17 @@ namespace Backup_Restore
                 string textoArquivo = System.IO.File.ReadAllText(arquivoConfig);
                 ConfigAutomatica configCarregada = System.Text.Json.JsonSerializer.Deserialize<ConfigAutomatica>(textoArquivo);
 
-                string versaoBancoFb = configCarregada.Configuracoes.BANCO_DADOS_VERSAO.Split('.')[0];
-                string extBanco = System.IO.Path.GetExtension(configCarregada.Configuracoes.NOME_BANCODADOS).ToLower();
+                string versaoBancoFbAut = configCarregada.Configuracoes.BANCO_DADOS_VERSAO.Split('.')[0];
+                string extBancoAut = System.IO.Path.GetExtension(configCarregada.Configuracoes.NOME_BANCODADOS).ToLower();
                 string caminhoBancoAut = System.IO.Path.Combine(configCarregada.Configuracoes.BANCO_REMOTO, configCarregada.Configuracoes.NOME_BANCODADOS);
-                string bancoPostgres = configCarregada.Configuracoes.NOME_BANCODADOS;
+                string bancoPostgresAut = configCarregada.Configuracoes.NOME_BANCODADOS;
 
-                if (versaoBancoFb == "2" )
+                if (versaoBancoFbAut == "2" )
                 {
                     cmbBanco.SelectedIndex = 0;
                     txtOrigemPath.Text = caminhoBancoAut;
                 }
-                else if (versaoBancoFb == "4")
+                else if (versaoBancoFbAut == "4")
                 {
                     cmbBanco.SelectedIndex = 1;
                     txtOrigemPath.Text = caminhoBancoAut;
@@ -49,16 +49,9 @@ namespace Backup_Restore
                 else
                 {
                     cmbBanco.SelectedIndex = 2;
-                    txtNomeBanco.Text = bancoPostgres;
+                    txtNomeBanco.Text = bancoPostgresAut;
                 }
-                if (extBanco == ".fdb")
-                {
-                    cmbAcao.SelectedIndex = 0;
-                }
-                else if (extBanco == ".fbk")
-                {
-                    cmbAcao.SelectedIndex = 1;
-                }
+                if (extBancoAut == ".fdb") { cmbAcao.SelectedIndex = 0; }
                 else { cmbAcao.SelectedIndex = -1; }
             }
         }
@@ -216,7 +209,7 @@ namespace Backup_Restore
                 string nomeBanco = txtNomeBanco.Text;
 
                 if (indexAcao == 0) executarProcesso.Add(ComandosPostgres.BackupPostgres(pastaPg, nomeBanco, destino, senha));
-                else if (indexAcao == 1) executarProcesso.Add(ComandosPostgres.RestorePostgres(pastaPg, nomeBanco, origem, senha));
+                else if (indexAcao == 1) executarProcesso.AddRange(ComandosPostgres.RestorePostgres(pastaPg, nomeBanco, origem, senha));
                 else executarProcesso.AddRange(ComandosPostgres.ManutencaoPostgres(pastaPg, nomeBanco, senha));
             }
 
@@ -244,7 +237,7 @@ namespace Backup_Restore
 
                     await processoAtual.WaitForExitAsync();
 
-                    if (processoAtual.ExitCode != 0 && !canceladoPelousuario)
+                    if (processoAtual.ExitCode != 0 && !canceladoPelousuario && System.IO.Path.GetFileName(config.FileName) != "psql.exe")
                     {
                         btnIniciar.Content = "Iniciar";
                         btnSair.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
