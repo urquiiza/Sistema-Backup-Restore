@@ -143,7 +143,7 @@
                             <ComboBoxItem Name="cbiManutencao" Content="Manutenção" Visibility="Collapsed"/>
                         </ComboBox>
 
-                        <TextBlock Text="Caminho do Banco Origem:" Margin="0,4,0,0" HorizontalAlignment="Left" FontWeight="SemiBold" />
+                        <TextBlock Name="lblOrigem" Text="Caminho do Banco Origem:" Margin="0,4,0,0" HorizontalAlignment="Left" FontWeight="SemiBold" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                             <TextBox Name="txtOrigemPath" Height="25" Margin="0,5,5,0" Width="210" />
                             <Button Name="btnBuscarOrigem" Content="Procurar..." Height="25" Margin="0,5,0,0" Width="80" HorizontalAlignment="Left" Click="btnBuscarOrigem_Click" />

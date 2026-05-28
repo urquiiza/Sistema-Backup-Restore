@@ -23,6 +23,44 @@ namespace Backup_Restore
     {
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            string pastaArquivo = ".hos\\config";
+            string pastaUsuario = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string arquivoConfig = System.IO.Path.Combine(pastaUsuario, pastaArquivo);
+            if (System.IO.File.Exists(arquivoConfig))
+            {
+                string textoArquivo = System.IO.File.ReadAllText(arquivoConfig);
+                ConfigAutomatica configCarregada = System.Text.Json.JsonSerializer.Deserialize<ConfigAutomatica>(textoArquivo);
+
+                string versaoBancoFb = configCarregada.Configuracoes.BANCO_DADOS_VERSAO.Split('.')[0];
+                string extBanco = System.IO.Path.GetExtension(configCarregada.Configuracoes.NOME_BANCODADOS).ToLower();
+                string caminhoBancoAut = System.IO.Path.Combine(configCarregada.Configuracoes.BANCO_REMOTO, configCarregada.Configuracoes.NOME_BANCODADOS);
+                string bancoPostgres = configCarregada.Configuracoes.NOME_BANCODADOS;
+
+                if (versaoBancoFb == "2")
+                {
+                    cmbBanco.SelectedIndex = 0;
+                    txtOrigemPath.Text = caminhoBancoAut;
+                }
+                else if (versaoBancoFb == "4")
+                {
+                    cmbBanco.SelectedIndex = 1;
+                    txtOrigemPath.Text = caminhoBancoAut;
+                }
+                else
+                {
+                    cmbBanco.SelectedIndex = 2;
+                    txtNomeBanco.Text = bancoPostgres;
+                }
+                if (extBanco == ".fdb")
+                {
+                    cmbAcao.SelectedIndex = 0;
+                }
+                else if (extBanco == ".fbk")
+                {
+                    cmbAcao.SelectedIndex = 1;
+                }
+                else { cmbAcao.SelectedIndex = -1; }
+            }
             cmbHora.ItemsSource = Enumerable.Range(0, 24).Select(h => h.ToString("D2")).ToList();
             cmbMinuto.ItemsSource = Enumerable.Range(0, 60).Select(m => m.ToString("D2")).ToList();
         }
@@ -335,6 +373,10 @@ namespace Backup_Restore
                 lblDestino.Visibility = Visibility.Collapsed;
                 txtDestinoPath.Visibility = Visibility.Collapsed;
                 btnBuscarDestino.Visibility = Visibility.Collapsed;
+
+                lblOrigem.Visibility = Visibility.Collapsed;
+                txtOrigemPath.Visibility = Visibility.Collapsed;
+                btnBuscarOrigem.Visibility = Visibility.Collapsed;
             }
         }
         public (DateTime? data, int? hora, int? minuto) ObterDataHoraAgendamento()
@@ -345,32 +387,78 @@ namespace Backup_Restore
             return (dataSelecionada, horaSelecionada, minutoSelecionado);
         }
 
-        private void btnAgendar_Click(object sender, RoutedEventArgs e)
+        public DateTime? DataHoraAgendada()
         {
             var escolha = ObterDataHoraAgendamento();
-
-            if (escolha.data.HasValue && escolha.hora.HasValue && escolha.minuto.HasValue)
+            if (!escolha.data.HasValue || !escolha.hora.HasValue || !escolha.minuto.HasValue)
             {
-                DateTime dataHoraAgendada = new DateTime(
-                    escolha.data.Value.Year,
-                    escolha.data.Value.Month,
-                    escolha.data.Value.Day,
-                    escolha.hora.Value,
-                    escolha.minuto.Value,
-                    0);
+                return null;
+            }
+            return new DateTime(
+                escolha.data.Value.Year,
+                escolha.data.Value.Month,
+                escolha.data.Value.Day,
+                escolha.hora.Value,
+                escolha.minuto.Value,
+                0);
+        }
+        private void btnAgendar_Click(object sender, RoutedEventArgs e)
+        {
+            DateTime? agendaTarefa = DataHoraAgendada();
+            string senhaInformada = ObterSenhaAtual();
 
-                string caminhoexe = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
-                string argumentos = $"/manutencao {pbSenha.Password}";
-                ExecAction executaAcao = new ExecAction(caminhoexe, argumentos);
-
+            if (agendaTarefa != null)
+            {
+                if (agendaTarefa < DateTime.Now)
+                {
+                    System.Windows.MessageBox.Show("Informe uma data e hora superior a atual.");
+                    return;
+                }
+                if (cmbBanco.SelectedIndex != 2 || cmbAcao.SelectedIndex != 2)
+                {
+                    System.Windows.MessageBox.Show("Somente é possível agendar manutenção para PostgresSQL. Ação e banco alterados para manutenção e postgreSQL!\n\nManutenção para bancos Firebird em desenvolvimento.");
+                    cmbBanco.SelectedIndex = 2;
+                    cmbAcao.SelectedIndex = 2;
+                    AbasMenu.SelectedIndex = 0;
+                    return;
+                }
+                if (string.IsNullOrEmpty(txtVersao.Text))
+                {
+                    System.Windows.MessageBox.Show("Selecione a versão PostgresSQL na aba 'Configurações'!");
+                    AbasMenu.SelectedIndex = 0;
+                    return;
+                }
+                if (string.IsNullOrEmpty(txtNomeBanco.Text))
+                {
+                    System.Windows.MessageBox.Show("Informe o nome do banco na aba 'Configurações'!");
+                    AbasMenu.SelectedIndex = 0;
+                    return;
+                }
+                if (string.IsNullOrEmpty(senhaInformada))
+                {
+                    System.Windows.MessageBox.Show("Informe a senha do banco na aba 'Configurações'.");
+                    AbasMenu.SelectedIndex = 0;
+                    return;
+                }
+            }
+            else
+            {
+                System.Windows.MessageBox.Show("Data, hora ou minuto não foram preenchidos corretamente.");
+                return;
+            }
+            string caminhoexe = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+            string argumentos = $"/manutencao {cmbBanco.SelectedIndex} {cmbAcao.SelectedIndex} \"{txtVersao.Text}\" {txtNomeBanco.Text} {senhaInformada}";
+            ExecAction executaAcao = new ExecAction(caminhoexe, argumentos);
+            try
+            {
                 using (TaskService ts = new TaskService())
                 {
                     TaskDefinition td = ts.NewTask();
                     td.RegistrationInfo.Description = "Manutenção Automática de Banco de Dados HOS.";
 
                     DailyTrigger dailyTrigger = new DailyTrigger();
-                    dailyTrigger.StartBoundary = dataHoraAgendada;
-                    dailyTrigger.DaysInterval = 1;
+
+                    dailyTrigger.StartBoundary = (DateTime)agendaTarefa;
 
                     td.Triggers.Add(dailyTrigger);
                     td.Actions.Add(executaAcao);
@@ -378,16 +466,22 @@ namespace Backup_Restore
                     ts.RootFolder.RegisterTaskDefinition("ManutencaoHOS", td);
 
                     System.Windows.MessageBox.Show("Agendamento criado com sucesso!");
+
+                    dtpAgendaManutencao.SelectedDate = null;
+                    cmbHora.SelectedIndex = -1;
+                    cmbMinuto.SelectedIndex = -1;
                 }
             }
-            else
+            catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("Preencha os campos de data e hora corretamente.");
+                System.Windows.MessageBox.Show($"Erro ao criar o agendamento: \n{ex.Message}");
             }
         }
         private void btnLimpar_Click(object sender, RoutedEventArgs e)
         {
-
+            dtpAgendaManutencao.SelectedDate = null;
+            cmbHora.SelectedIndex = -1;
+            cmbMinuto.SelectedIndex = -1;
         }
     }
 }

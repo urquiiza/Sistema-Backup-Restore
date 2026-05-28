@@ -12,14 +12,16 @@ namespace Backup_Restore
     {
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            if (e.Args.Length > 1)
+            if (e.Args.Length > 1 && e.Args[0] == "/manutencao")
             {
-                if (e.Args[0] == "/manutencao")
-                {
                     AgendaManutencao agendaManutencao = new AgendaManutencao();
-                    agendaManutencao.Executar(e.Args[1]);
+                    agendaManutencao.Executar(e.Args[1], e.Args[2], e.Args[3], e.Args[4], e.Args[5]);
                     App.Current.Shutdown();
-                }
+            }
+            else
+            {
+                MainWindow telaPrincipal = new MainWindow();
+                telaPrincipal.Show();
             }
         }
     }
