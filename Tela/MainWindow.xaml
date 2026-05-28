@@ -142,7 +142,7 @@
                             <ComboBoxItem Content="Restore"/>
                             <ComboBoxItem Name="cbiManutencao" Content="Manutenção" Visibility="Collapsed"/>
                         </ComboBox>
-                        
+
                         <TextBlock Text="Caminho do Banco Origem:" Margin="0,4,0,0" HorizontalAlignment="Left" FontWeight="SemiBold" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                             <TextBox Name="txtOrigemPath" Height="25" Margin="0,5,5,0" Width="210" />
@@ -206,6 +206,24 @@
                  Padding="10"
                  BorderThickness="0"
                  Text="Aguardando inicialização do processo...&#x0A;"/>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Agendador">
+            <Grid Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0" Width="200">
+                    <DatePicker x:Name="dtpAgendaManutencao" Margin="0,0,0,10"/>
+                    <ComboBox x:Name="cmbHora" Margin="0,0,0,10"/>
+                    <ComboBox x:Name="cmbMinuto"/>
+                </StackPanel>
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
+                    <Button x:Name="btnAgendar" Content="Agendar" Width="130" Margin="5,0,5,0" Click="btnAgendar_Click" />
+                    <Button x:Name="btnLimpar" Content="Limpar" Width="130" Margin="5,0,5,0" Click="btnLimpar_Click" />
+                </StackPanel>
             </Grid>
         </TabItem>
     </TabControl>

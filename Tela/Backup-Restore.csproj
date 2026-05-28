@@ -23,6 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="TaskScheduler" Version="2.12.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Resource\dromi-hos.png" />
     <Resource Include="Resource\hos-farma.png" />
   </ItemGroup>

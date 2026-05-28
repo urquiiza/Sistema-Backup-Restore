@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Win32.TaskScheduler;
 
 namespace Backup_Restore
 {
@@ -22,38 +23,8 @@ namespace Backup_Restore
     {
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            string pastaArquivo = ".hos\\config";
-            string pastaUsuario = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            string arquivoConfig = System.IO.Path.Combine(pastaUsuario, pastaArquivo);
-
-            if (System.IO.File.Exists(arquivoConfig))
-            {
-                string textoArquivo = System.IO.File.ReadAllText(arquivoConfig);
-                ConfigAutomatica configCarregada = System.Text.Json.JsonSerializer.Deserialize<ConfigAutomatica>(textoArquivo);
-
-                string versaoBancoFbAut = configCarregada.Configuracoes.BANCO_DADOS_VERSAO.Split('.')[0];
-                string extBancoAut = System.IO.Path.GetExtension(configCarregada.Configuracoes.NOME_BANCODADOS).ToLower();
-                string caminhoBancoAut = System.IO.Path.Combine(configCarregada.Configuracoes.BANCO_REMOTO, configCarregada.Configuracoes.NOME_BANCODADOS);
-                string bancoPostgresAut = configCarregada.Configuracoes.NOME_BANCODADOS;
-
-                if (versaoBancoFbAut == "2" )
-                {
-                    cmbBanco.SelectedIndex = 0;
-                    txtOrigemPath.Text = caminhoBancoAut;
-                }
-                else if (versaoBancoFbAut == "4")
-                {
-                    cmbBanco.SelectedIndex = 1;
-                    txtOrigemPath.Text = caminhoBancoAut;
-                }
-                else
-                {
-                    cmbBanco.SelectedIndex = 2;
-                    txtNomeBanco.Text = bancoPostgresAut;
-                }
-                if (extBancoAut == ".fdb") { cmbAcao.SelectedIndex = 0; }
-                else { cmbAcao.SelectedIndex = -1; }
-            }
+            cmbHora.ItemsSource = Enumerable.Range(0, 24).Select(h => h.ToString("D2")).ToList();
+            cmbMinuto.ItemsSource = Enumerable.Range(0, 60).Select(m => m.ToString("D2")).ToList();
         }
         private Process processoAtual;
         private bool canceladoPelousuario = false;
@@ -101,7 +72,7 @@ namespace Backup_Restore
             {
                 dlg.Filter = "Arquivos PostgreSQL (*.dump)|*.dump";
             }
-            else 
+            else
             {
                 dlg.Filter = "Arquivos Firebird (*.fbk;*.fdb)|*.fbk;*.fdb";
             }
@@ -149,7 +120,7 @@ namespace Backup_Restore
                 return;
             }
 
-            if(cmbBanco.SelectedIndex == -1 || cmbAcao.SelectedIndex == -1)
+            if (cmbBanco.SelectedIndex == -1 || cmbAcao.SelectedIndex == -1)
             {
                 System.Windows.MessageBox.Show("Selecione o banco de dados e a acao desejada!");
                 return;
@@ -203,7 +174,7 @@ namespace Backup_Restore
                 if (indexAcao == 0) executarProcesso.Add(ComandosFirebird.BackupFirebird(pastaFb, origem, destino, senha));
                 else executarProcesso.Add(ComandosFirebird.RestoreFirebird(pastaFb, origem, destino, senha));
             }
-            else 
+            else
             {
                 string pastaPg = System.IO.Path.Combine(txtVersao.Text, "bin");
                 string nomeBanco = txtNomeBanco.Text;
@@ -298,7 +269,7 @@ namespace Backup_Restore
             if (!fechamentoSeguro)
             {
                 e.Cancel = true;
-                this.Hide();                 
+                this.Hide();
                 iconeBandeja.Visible = true;
 
                 iconeBandeja.ShowBalloonTip(2000, "Minimizado", "O sistema continua rodando em segundo plano. Clique duplo para abrir.", System.Windows.Forms.ToolTipIcon.Info);
@@ -365,6 +336,58 @@ namespace Backup_Restore
                 txtDestinoPath.Visibility = Visibility.Collapsed;
                 btnBuscarDestino.Visibility = Visibility.Collapsed;
             }
+        }
+        public (DateTime? data, int? hora, int? minuto) ObterDataHoraAgendamento()
+        {
+            DateTime? dataSelecionada = dtpAgendaManutencao.SelectedDate;
+            int? horaSelecionada = cmbHora.SelectedItem != null ? int.Parse(cmbHora.SelectedItem.ToString()) : null;
+            int? minutoSelecionado = cmbMinuto.SelectedItem != null ? int.Parse(cmbMinuto.SelectedItem.ToString()) : null;
+            return (dataSelecionada, horaSelecionada, minutoSelecionado);
+        }
+
+        private void btnAgendar_Click(object sender, RoutedEventArgs e)
+        {
+            var escolha = ObterDataHoraAgendamento();
+
+            if (escolha.data.HasValue && escolha.hora.HasValue && escolha.minuto.HasValue)
+            {
+                DateTime dataHoraAgendada = new DateTime(
+                    escolha.data.Value.Year,
+                    escolha.data.Value.Month,
+                    escolha.data.Value.Day,
+                    escolha.hora.Value,
+                    escolha.minuto.Value,
+                    0);
+
+                string caminhoexe = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                string argumentos = $"/manutencao {pbSenha.Password}";
+                ExecAction executaAcao = new ExecAction(caminhoexe, argumentos);
+
+                using (TaskService ts = new TaskService())
+                {
+                    TaskDefinition td = ts.NewTask();
+                    td.RegistrationInfo.Description = "Manutenção Automática de Banco de Dados HOS.";
+
+                    DailyTrigger dailyTrigger = new DailyTrigger();
+                    dailyTrigger.StartBoundary = dataHoraAgendada;
+                    dailyTrigger.DaysInterval = 1;
+
+                    td.Triggers.Add(dailyTrigger);
+                    td.Actions.Add(executaAcao);
+
+                    ts.RootFolder.RegisterTaskDefinition("ManutencaoHOS", td);
+
+                    System.Windows.MessageBox.Show("Agendamento criado com sucesso!");
+                }
+            }
+            else
+            {
+                System.Windows.MessageBox.Show("Preencha os campos de data e hora corretamente.");
+            }
+        }
+        private void btnLimpar_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
