@@ -20,7 +20,7 @@ namespace Backup_Restore
                 string nomeBase = Path.GetFileNameWithoutExtension(caminhoOrigem);
                 if (string.IsNullOrWhiteSpace(nomeBase)) nomeBase = "Backup_Firebird";
 
-                arquivoDestinoBackup = Path.Combine(caminhoDestino, nomeBase + ".fbk");
+                arquivoDestinoBackup = Path.Combine(caminhoDestino, nomeBase + ".FBK");
             }
 
             string executavel = Path.Combine(pastaExecutavel, "gbak.exe");
@@ -46,6 +46,24 @@ namespace Backup_Restore
             string argumentos = $"-c -v -user SYSDBA \"{caminhoOrigem}\" \"{arquivoDestinoBanco}\"";
 
             return ConfiguradorProcesso.CriarBase(executavel, argumentos, VARIAVEL_SENHA, senha);
+        }
+        public static List<ProcessStartInfo> ManutencaoFirebird(string pastaExecutavel, string caminhoOrigem, string caminhoDestino, string senha)
+        {
+            List<ProcessStartInfo> manutencaoFire = new List<ProcessStartInfo>();
+            
+            string destinoBackup = @"C:\MANUTENÇÃO";
+            if (!System.IO.Directory.Exists(destinoBackup))
+            {
+                System.IO.Directory.CreateDirectory(destinoBackup);
+            }
+            
+            string arquivoTemporario = System.IO.Path.GetFileNameWithoutExtension(caminhoOrigem) + ".FBK";
+            string arquivoFbk = System.IO.Path.Combine(destinoBackup, arquivoTemporario);
+
+            manutencaoFire.Add(BackupFirebird(pastaExecutavel, caminhoOrigem, arquivoFbk, senha));
+            manutencaoFire.Add(RestoreFirebird(pastaExecutavel, arquivoFbk, caminhoOrigem, senha));
+
+            return manutencaoFire;
         }
     }
 }
