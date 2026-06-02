@@ -43,7 +43,7 @@ namespace Backup_Restore
 
             string executavel = Path.Combine(pastaExecutavel, "gbak.exe");
 
-            string argumentos = $"-c -v -user SYSDBA \"{caminhoOrigem}\" \"{arquivoDestinoBanco}\"";
+            string argumentos = $"-rep -v -user SYSDBA \"{caminhoOrigem}\" \"{arquivoDestinoBanco}\"";
 
             return ConfiguradorProcesso.CriarBase(executavel, argumentos, VARIAVEL_SENHA, senha);
         }

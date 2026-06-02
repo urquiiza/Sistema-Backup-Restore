@@ -210,7 +210,8 @@ namespace Backup_Restore
                 string pastaFb = indexBanco == 0 ? @"C:\Program Files\Firebird\Firebird_2_5\bin" : @"C:\Program Files\Firebird\Firebird_4_0";
 
                 if (indexAcao == 0) executarProcesso.Add(ComandosFirebird.BackupFirebird(pastaFb, origem, destino, senha));
-                else executarProcesso.Add(ComandosFirebird.RestoreFirebird(pastaFb, origem, destino, senha));
+                else if (indexAcao == 1) executarProcesso.Add(ComandosFirebird.RestoreFirebird(pastaFb, origem, destino, senha));
+                else executarProcesso.AddRange(ComandosFirebird.ManutencaoFirebird(pastaFb, origem, destino, senha));
             }
             else
             {
@@ -319,17 +320,15 @@ namespace Backup_Restore
 
             lblAcao.Visibility = Visibility.Visible;
             cmbAcao.Visibility = Visibility.Visible;
+            //if (cmbBanco.SelectedIndex == 2)
+            //{
+            cbiManutencao.Visibility = Visibility.Visible;
+            //else
+            //{
+            //    cbiManutencao.Visibility = Visibility.Collapsed;
 
-            if (cmbBanco.SelectedIndex == 2)
-            {
-                cbiManutencao.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                cbiManutencao.Visibility = Visibility.Collapsed;
-
-                if (cmbAcao.SelectedIndex == 2) cmbAcao.SelectedIndex = 0;
-            }
+            //    if (cmbAcao.SelectedIndex == 2) cmbAcao.SelectedIndex = 0;
+            //}
 
             AtualizarVisibilidadeCampos();
         }
@@ -339,6 +338,11 @@ namespace Backup_Restore
         }
         private void AtualizarVisibilidadeCampos()
         {
+            lblDestino.Text = "Caminho do Banco Origem:";
+            lblOrigem.Visibility = Visibility.Visible;
+            txtOrigemPath.Visibility = Visibility.Visible;
+            btnBuscarOrigem.Visibility = Visibility.Visible;
+
             lblDestino.Text = "Pasta de Destino para Salvar:";
             lblDestino.Visibility = Visibility.Visible;
             txtDestinoPath.Visibility = Visibility.Visible;
@@ -368,7 +372,7 @@ namespace Backup_Restore
                 lblSenha.Visibility = Visibility.Visible;
                 panelSenha.Visibility = Visibility.Visible;
             }
-            if (cmbAcao.SelectedIndex == 2)
+            if (cmbBanco.SelectedIndex == 2 && cmbAcao.SelectedIndex == 2)
             {
                 lblDestino.Visibility = Visibility.Collapsed;
                 txtDestinoPath.Visibility = Visibility.Collapsed;
@@ -377,6 +381,12 @@ namespace Backup_Restore
                 lblOrigem.Visibility = Visibility.Collapsed;
                 txtOrigemPath.Visibility = Visibility.Collapsed;
                 btnBuscarOrigem.Visibility = Visibility.Collapsed;
+            }
+            else if (cmbBanco.SelectedIndex == 0 && cmbAcao.SelectedIndex == 2 || cmbBanco.SelectedIndex == 1 && cmbAcao.SelectedIndex == 2) 
+            {
+                lblDestino.Visibility = Visibility.Collapsed;
+                txtDestinoPath.Visibility = Visibility.Collapsed;
+                btnBuscarDestino.Visibility = Visibility.Collapsed;
             }
         }
         public (DateTime? data, int? hora, int? minuto) ObterDataHoraAgendamento()
@@ -414,31 +424,43 @@ namespace Backup_Restore
                     System.Windows.MessageBox.Show("Informe uma data e hora superior a atual.");
                     return;
                 }
-                if (cmbBanco.SelectedIndex != 2 || cmbAcao.SelectedIndex != 2)
-                {
-                    System.Windows.MessageBox.Show("Somente é possível agendar manutenção para PostgresSQL. Ação e banco alterados para manutenção e postgreSQL!\n\nManutenção para bancos Firebird em desenvolvimento.");
-                    cmbBanco.SelectedIndex = 2;
-                    cmbAcao.SelectedIndex = 2;
-                    AbasMenu.SelectedIndex = 0;
-                    return;
+                //if (cmbBanco.SelectedIndex != 2 || cmbAcao.SelectedIndex != 2)
+                //{
+                //    System.Windows.MessageBox.Show("Somente é possível agendar manutenção para PostgresSQL. Ação e banco alterados para manutenção e postgreSQL!\n\nManutenção para bancos Firebird em desenvolvimento.");
+                //    cmbBanco.SelectedIndex = 2;
+                //    cmbAcao.SelectedIndex = 2;
+                //    AbasMenu.SelectedIndex = 0;
+                //    return;
+                //}
+                if (cmbBanco.SelectedIndex == 2)
+                { 
+                    if (string.IsNullOrEmpty(txtVersao.Text))
+                    {
+                        System.Windows.MessageBox.Show("Selecione a versão PostgresSQL/Firebird na aba 'Configurações'!");
+                        AbasMenu.SelectedIndex = 0;
+                        return;
+                    }
+                    if (string.IsNullOrEmpty(txtNomeBanco.Text))
+                    {
+                        System.Windows.MessageBox.Show("Informe o nome do banco na aba 'Configurações'!");
+                        AbasMenu.SelectedIndex = 0;
+                        return;
+                    }
+                    if (string.IsNullOrEmpty(senhaInformada))
+                    {
+                        System.Windows.MessageBox.Show("Informe a senha do banco na aba 'Configurações'.");
+                        AbasMenu.SelectedIndex = 0;
+                        return;
+                    }
                 }
-                if (string.IsNullOrEmpty(txtVersao.Text))
+                else if (cmbBanco.SelectedIndex == 0 || cmbBanco.SelectedIndex == 1)
                 {
-                    System.Windows.MessageBox.Show("Selecione a versão PostgresSQL na aba 'Configurações'!");
-                    AbasMenu.SelectedIndex = 0;
-                    return;
-                }
-                if (string.IsNullOrEmpty(txtNomeBanco.Text))
-                {
-                    System.Windows.MessageBox.Show("Informe o nome do banco na aba 'Configurações'!");
-                    AbasMenu.SelectedIndex = 0;
-                    return;
-                }
-                if (string.IsNullOrEmpty(senhaInformada))
-                {
-                    System.Windows.MessageBox.Show("Informe a senha do banco na aba 'Configurações'.");
-                    AbasMenu.SelectedIndex = 0;
-                    return;
+                    if (string.IsNullOrEmpty(txtOrigemPath.Text))
+                    {
+                        System.Windows.MessageBox.Show("Informe a pasta do banco origem na aba 'Configurações'!");
+                        AbasMenu.SelectedIndex = 0;
+                        return;
+                    }
                 }
             }
             else
@@ -446,11 +468,11 @@ namespace Backup_Restore
                 System.Windows.MessageBox.Show("Data, hora ou minuto não foram preenchidos corretamente.");
                 return;
             }
-            string caminhoexe = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
-            string argumentos = $"/manutencao {cmbBanco.SelectedIndex} {cmbAcao.SelectedIndex} \"{txtVersao.Text}\" {txtNomeBanco.Text} {senhaInformada}";
-            ExecAction executaAcao = new ExecAction(caminhoexe, argumentos);
             try
             {
+                string caminhoexe = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                string argumentos = $"/manutencao \"{cmbBanco.SelectedIndex}\" \"{cmbAcao.SelectedIndex}\" \"{senhaInformada}\" \"{txtVersao.Text}\" \"{txtNomeBanco.Text}\" \"{txtOrigemPath.Text}\" \"{txtDestinoPath.Text}\"";
+                ExecAction executaAcao = new ExecAction(caminhoexe, argumentos);
                 using (TaskService ts = new TaskService())
                 {
                     TaskDefinition td = ts.NewTask();

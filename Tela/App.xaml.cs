@@ -15,7 +15,7 @@ namespace Backup_Restore
             if (e.Args.Length > 1 && e.Args[0] == "/manutencao")
             {
                     AgendaManutencao agendaManutencao = new AgendaManutencao();
-                    agendaManutencao.Executar(e.Args[1], e.Args[2], e.Args[3], e.Args[4], e.Args[5]);
+                    agendaManutencao.Executar(e.Args[1], e.Args[2], e.Args[3], e.Args[4], e.Args[5], e.Args[6], e.Args[7]);
                     App.Current.Shutdown();
             }
             else

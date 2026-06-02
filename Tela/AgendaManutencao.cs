@@ -12,7 +12,7 @@ namespace Backup_Restore
 {
     public class AgendaManutencao
     {
-        public void Executar(string banco, string acao, string versao, string nomeBanco, string senha, string caminhoOrigem, string caminhoDestino)
+        public void Executar(string banco, string acao, string senha, string versao = null, string nomeBanco = null, string caminhoOrigem = null, string caminhoDestino = null)
         {
             if (banco == "2")
             {
@@ -28,8 +28,19 @@ namespace Backup_Restore
                     {
                         using (System.Diagnostics.Process processos = new System.Diagnostics.Process())
                         {
+                            comando.RedirectStandardOutput = true;
+                            comando.RedirectStandardError = true;
+                            comando.UseShellExecute = false; 
+
                             processos.StartInfo = comando;
+
+                            processos.OutputDataReceived += (s, args) => { };
+                            processos.ErrorDataReceived += (s, args) => { };
+
                             processos.Start();
+                            processos.BeginOutputReadLine();
+                            processos.BeginErrorReadLine();
+                            
                             processos.WaitForExit();
                             if (processos.ExitCode != 0)
                             {
@@ -39,13 +50,14 @@ namespace Backup_Restore
                     }
                     string mensagemSucesso = $"{DateTime.Now} Manutenção do banco '{nomeBanco}' concluída com sucesso.\n";
                     System.IO.File.AppendAllText(arquivoLog, mensagemSucesso);
-                    System.Windows.MessageBox.Show($"{DateTime.Now} Manutenção automática concluída com sucesso!");
+                    //System.Windows.MessageBox.Show($"{DateTime.Now} Manutenção automática concluída com sucesso!");
+                    return;
                 }
                 catch (Exception ex)
                 {
                     string mensagemFalha = $"{DateTime.Now} ERRO na manutenção do banco '{nomeBanco}'.\n{ex}\n";
                     System.IO.File.AppendAllText(arquivoLog, mensagemFalha);
-                    System.Windows.MessageBox.Show($"{DateTime.Now} ERRO: Manutenção automática falhou.\nVerifique os logs de erros para mais informações.\n\nCaminho: {arquivoLog}");
+                    //System.Windows.MessageBox.Show($"{DateTime.Now} ERRO: Manutenção automática falhou.\nVerifique os logs de erros para mais informações.\n\nCaminho: {arquivoLog}");
                     return;
                 }
             }
@@ -64,8 +76,19 @@ namespace Backup_Restore
                         {
                             using (System.Diagnostics.Process processos = new System.Diagnostics.Process())
                             {
+                                comando.RedirectStandardOutput = true;
+                                comando.RedirectStandardError = true;
+                                comando.UseShellExecute = false;
+
                                 processos.StartInfo = comando;
+
+                                processos.OutputDataReceived += (s, args) => { };
+                                processos.ErrorDataReceived += (s, args) => { };
+
                                 processos.Start();
+                                processos.BeginOutputReadLine();
+                                processos.BeginErrorReadLine();
+
                                 processos.WaitForExit();
                                 if (processos.ExitCode != 0)
                                 {
@@ -76,6 +99,7 @@ namespace Backup_Restore
                         string mensagemSucesso = $"{DateTime.Now} Manutenção do banco '{nomeBanco}' concluída com sucesso.\n";
                         System.IO.File.AppendAllText(arquivoLog, mensagemSucesso);
                         System.Windows.MessageBox.Show($"{DateTime.Now} Manutenção automática concluída com sucesso!");
+                        return;
                     }
                     catch (Exception ex)
                     {
