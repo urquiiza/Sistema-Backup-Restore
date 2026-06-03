@@ -129,15 +129,28 @@
                 </Grid.RowDefinitions>
                 <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="0,0,0,10" HorizontalAlignment="Center">
-                        <TextBlock Text="Banco de Dados:" HorizontalAlignment="Center" Margin="0,5,0,5" FontWeight="SemiBold"/>
-                        <ComboBox Name="cmbBanco" SelectionChanged="cmbBanco_SelectionChanged" Margin="10,0,10,10" Height="25">
+                        <StackPanel Name="painelAgendamento" Visibility="Collapsed" Margin="0,15,0,5" Width="280" HorizontalAlignment="Left">
+                            <StackPanel>
+                                <TextBlock Text="Detalhes do Agendamento" FontWeight="SemiBold" Foreground="#315C85" Margin="0,0,0,12" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Data de Início:" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                                <DatePicker x:Name="dtpAgendaManutencao" Height="28" Margin="0,0,0,10" Width="248" HorizontalAlignment="Left"/>
+                                <TextBlock Text="Horário de Execução:" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                    <ComboBox x:Name="cmbHora" Width="65" Height="28" HorizontalContentAlignment="Center"/>
+                                    <TextBlock Text=":" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Margin="5,0"/>
+                                    <ComboBox x:Name="cmbMinuto" Width="65" Height="28" HorizontalContentAlignment="Center"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                        <TextBlock Text="Banco de Dados:" HorizontalAlignment="Left" Margin="0,5,0,5" FontWeight="SemiBold"/>
+                        <ComboBox Name="cmbBanco" SelectionChanged="cmbBanco_SelectionChanged" Margin="0,0,20,10" Height="25">
                             <ComboBoxItem Content="Firebird 2.5"/>
                             <ComboBoxItem Content="Firebird 4.0"/>
                             <ComboBoxItem Content="PostgresSQL"/>
                         </ComboBox>
 
-                        <TextBlock Name="lblAcao" Text="O que deseja fazer?" HorizontalAlignment="Center" Margin="0,0,0,5" FontWeight="SemiBold" Visibility="Collapsed" />
-                        <ComboBox Name="cmbAcao" SelectionChanged="cmbAcao_SelectionChanged" Margin="10,0,10,10" Height="25" Visibility="Collapsed">
+                        <TextBlock Name="lblAcao" Text="O que deseja fazer?" HorizontalAlignment="Left" Margin="0,0,0,5" FontWeight="SemiBold" Visibility="Collapsed" />
+                        <ComboBox Name="cmbAcao" SelectionChanged="cmbAcao_SelectionChanged" Margin="0,0,20,10" Height="25" Visibility="Collapsed">
                             <ComboBoxItem Content="Backup"/>
                             <ComboBoxItem Content="Restore"/>
                             <ComboBoxItem Name="cbiManutencao" Content="Manutenção" Visibility="Collapsed"/>
@@ -181,10 +194,16 @@
                     </StackPanel>
                 </ScrollViewer>
 
-                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
-                    <Button Name="btnIniciar" Content="Iniciar" Width="130" Margin="0,0,10,0" Click="btnIniciar_Click" />
-                    <Button Name="btnSair" Content="Sair" Width="130" Click="btnSair_Click" />
-                </StackPanel>
+                <Grid Grid.Row="1" Margin="0,15,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Name="btnIniciar" Grid.Column="0" Content="Iniciar" Click="btnIniciar_Click" />
+                    <Button Name="btnAgendar" Grid.Column="1" Content="Agendar&#x0A;Manutenção" Margin="5,0,5,0" Click="btnAgendar_Click" />
+                    <Button Name="btnSair" Grid.Column="2" Content="Sair" Click="btnSair_Click" />
+                </Grid>
 
             </Grid>
         </TabItem>
@@ -206,24 +225,6 @@
                  Padding="10"
                  BorderThickness="0"
                  Text="Aguardando inicialização do processo...&#x0A;"/>
-            </Grid>
-        </TabItem>
-        <TabItem Header="Agendador">
-            <Grid Margin="20">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" Width="200">
-                    <DatePicker x:Name="dtpAgendaManutencao" Margin="0,0,0,10"/>
-                    <ComboBox x:Name="cmbHora" Margin="0,0,0,10"/>
-                    <ComboBox x:Name="cmbMinuto"/>
-                </StackPanel>
-                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
-                    <Button x:Name="btnAgendar" Content="Agendar" Width="130" Margin="5,0,5,0" Click="btnAgendar_Click" />
-                    <Button x:Name="btnLimpar" Content="Limpar" Width="130" Margin="5,0,5,0" Click="btnLimpar_Click" />
-                </StackPanel>
             </Grid>
         </TabItem>
     </TabControl>

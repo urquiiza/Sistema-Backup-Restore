@@ -280,8 +280,24 @@ namespace Backup_Restore
         }
         private void btnSair_Click(object sender, RoutedEventArgs e)
         {
-            fechamentoSeguro = true;
-            System.Windows.Application.Current.Shutdown();
+            if (btnSair.Content.ToString() == "Cancelar")
+            {
+                dtpAgendaManutencao.SelectedDate = null;
+                cmbHora.SelectedIndex = -1;
+                cmbMinuto.SelectedIndex = -1;
+                painelAgendamento.Visibility = Visibility.Collapsed;
+                cmbAcao.IsEnabled = true;
+                btnIniciar.IsEnabled = true;
+                btnIniciar.Content = "Iniciar";
+                btnIniciar.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
+                btnSair.Content = "Sair";
+                btnAgendar.Content = "Agendar\nManutenção";
+            }
+            else
+            {
+                fechamentoSeguro = true;
+                System.Windows.Application.Current.Shutdown();
+            }
         }
 
         private void btnVerSenha_Click(object sender, RoutedEventArgs e)
@@ -320,16 +336,7 @@ namespace Backup_Restore
 
             lblAcao.Visibility = Visibility.Visible;
             cmbAcao.Visibility = Visibility.Visible;
-            //if (cmbBanco.SelectedIndex == 2)
-            //{
             cbiManutencao.Visibility = Visibility.Visible;
-            //else
-            //{
-            //    cbiManutencao.Visibility = Visibility.Collapsed;
-
-            //    if (cmbAcao.SelectedIndex == 2) cmbAcao.SelectedIndex = 0;
-            //}
-
             AtualizarVisibilidadeCampos();
         }
         private void cmbAcao_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -417,93 +424,99 @@ namespace Backup_Restore
             DateTime? agendaTarefa = DataHoraAgendada();
             string senhaInformada = ObterSenhaAtual();
 
-            if (agendaTarefa != null)
+            if (btnAgendar.Content.ToString() == "Agendar\nManutenção")
             {
-                if (agendaTarefa < DateTime.Now)
-                {
-                    System.Windows.MessageBox.Show("Informe uma data e hora superior a atual.");
-                    return;
-                }
-                //if (cmbBanco.SelectedIndex != 2 || cmbAcao.SelectedIndex != 2)
-                //{
-                //    System.Windows.MessageBox.Show("Somente é possível agendar manutenção para PostgresSQL. Ação e banco alterados para manutenção e postgreSQL!\n\nManutenção para bancos Firebird em desenvolvimento.");
-                //    cmbBanco.SelectedIndex = 2;
-                //    cmbAcao.SelectedIndex = 2;
-                //    AbasMenu.SelectedIndex = 0;
-                //    return;
-                //}
-                if (cmbBanco.SelectedIndex == 2)
-                { 
-                    if (string.IsNullOrEmpty(txtVersao.Text))
-                    {
-                        System.Windows.MessageBox.Show("Selecione a versão PostgresSQL/Firebird na aba 'Configurações'!");
-                        AbasMenu.SelectedIndex = 0;
-                        return;
-                    }
-                    if (string.IsNullOrEmpty(txtNomeBanco.Text))
-                    {
-                        System.Windows.MessageBox.Show("Informe o nome do banco na aba 'Configurações'!");
-                        AbasMenu.SelectedIndex = 0;
-                        return;
-                    }
-                    if (string.IsNullOrEmpty(senhaInformada))
-                    {
-                        System.Windows.MessageBox.Show("Informe a senha do banco na aba 'Configurações'.");
-                        AbasMenu.SelectedIndex = 0;
-                        return;
-                    }
-                }
-                else if (cmbBanco.SelectedIndex == 0 || cmbBanco.SelectedIndex == 1)
-                {
-                    if (string.IsNullOrEmpty(txtOrigemPath.Text))
-                    {
-                        System.Windows.MessageBox.Show("Informe a pasta do banco origem na aba 'Configurações'!");
-                        AbasMenu.SelectedIndex = 0;
-                        return;
-                    }
-                }
+                painelAgendamento.Visibility = Visibility.Visible;
+                lblDestino.Visibility = Visibility.Collapsed;
+                cmbAcao.SelectedIndex = 2;
+                cmbAcao.IsEnabled = false;
+                btnIniciar.IsEnabled = false;
+                btnIniciar.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Gray);
+                btnAgendar.Content = "Salvar";
+                btnSair.Content = "Cancelar";
             }
             else
             {
-                System.Windows.MessageBox.Show("Data, hora ou minuto não foram preenchidos corretamente.");
-                return;
-            }
-            try
-            {
-                string caminhoexe = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
-                string argumentos = $"/manutencao \"{cmbBanco.SelectedIndex}\" \"{cmbAcao.SelectedIndex}\" \"{senhaInformada}\" \"{txtVersao.Text}\" \"{txtNomeBanco.Text}\" \"{txtOrigemPath.Text}\" \"{txtDestinoPath.Text}\"";
-                ExecAction executaAcao = new ExecAction(caminhoexe, argumentos);
-                using (TaskService ts = new TaskService())
+                if (agendaTarefa != null)
                 {
-                    TaskDefinition td = ts.NewTask();
-                    td.RegistrationInfo.Description = "Manutenção Automática de Banco de Dados HOS.";
+                    if (agendaTarefa < DateTime.Now)
+                    {
+                        System.Windows.MessageBox.Show("Informe uma data e hora superior a atual.");
+                        return;
+                    }
+                    if (cmbBanco.SelectedIndex == 2)
+                    {
+                        if (string.IsNullOrEmpty(txtVersao.Text))
+                        {
+                            System.Windows.MessageBox.Show("Selecione a versão PostgresSQL na aba 'Configurações'!");
+                            //AbasMenu.SelectedIndex = 0;
+                            return;
+                        }
+                        if (string.IsNullOrEmpty(txtNomeBanco.Text))
+                        {
+                            System.Windows.MessageBox.Show("Informe o nome do banco na aba 'Configurações'!");
+                            //AbasMenu.SelectedIndex = 0;
+                            return;
+                        }
+                        if (string.IsNullOrEmpty(senhaInformada))
+                        {
+                            System.Windows.MessageBox.Show("Informe a senha do banco na aba 'Configurações'.");
+                            //AbasMenu.SelectedIndex = 0;
+                            return;
+                        }
+                    }
+                    else if (cmbBanco.SelectedIndex == 0 || cmbBanco.SelectedIndex == 1)
+                    {
+                        if (string.IsNullOrEmpty(txtOrigemPath.Text))
+                        {
+                            System.Windows.MessageBox.Show("Informe a pasta do banco origem na aba 'Configurações'!");
+                            //AbasMenu.SelectedIndex = 0;
+                            return;
+                        }
+                    }
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show("Data, hora ou minuto não foram preenchidos corretamente.");
+                    return;
+                }
+                try
+                {
+                    string caminhoexe = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                    string argumentos = $"/manutencao \"{cmbBanco.SelectedIndex}\" \"{cmbAcao.SelectedIndex}\" \"{senhaInformada}\" \"{txtVersao.Text}\" \"{txtNomeBanco.Text}\" \"{txtOrigemPath.Text}\" \"{txtDestinoPath.Text}\"";
+                    ExecAction executaAcao = new ExecAction(caminhoexe, argumentos);
+                    using (TaskService ts = new TaskService())
+                    {
+                        TaskDefinition td = ts.NewTask();
+                        td.RegistrationInfo.Description = "Manutenção Automática de Banco de Dados HOS.";
 
-                    DailyTrigger dailyTrigger = new DailyTrigger();
+                        DailyTrigger dailyTrigger = new DailyTrigger();
 
-                    dailyTrigger.StartBoundary = (DateTime)agendaTarefa;
+                        dailyTrigger.StartBoundary = (DateTime)agendaTarefa;
 
-                    td.Triggers.Add(dailyTrigger);
-                    td.Actions.Add(executaAcao);
+                        td.Triggers.Add(dailyTrigger);
+                        td.Actions.Add(executaAcao);
 
-                    ts.RootFolder.RegisterTaskDefinition("ManutencaoHOS", td);
+                        ts.RootFolder.RegisterTaskDefinition("ManutencaoHOS", td);
 
-                    System.Windows.MessageBox.Show("Agendamento criado com sucesso!");
+                        System.Windows.MessageBox.Show("Agendamento criado com sucesso!");
 
-                    dtpAgendaManutencao.SelectedDate = null;
-                    cmbHora.SelectedIndex = -1;
-                    cmbMinuto.SelectedIndex = -1;
+                        dtpAgendaManutencao.SelectedDate = null;
+                        cmbHora.SelectedIndex = -1;
+                        cmbMinuto.SelectedIndex = -1;
+                    }
+                    painelAgendamento.Visibility = Visibility.Collapsed;
+                    cmbAcao.IsEnabled = true;
+                    btnIniciar.IsEnabled = true;
+                    btnIniciar.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
+                    btnAgendar.Content = "Agendar\nManutenção";
+                    btnSair.Content = "Sair";
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show($"Erro ao criar o agendamento: \n{ex.Message}");
                 }
             }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Erro ao criar o agendamento: \n{ex.Message}");
-            }
-        }
-        private void btnLimpar_Click(object sender, RoutedEventArgs e)
-        {
-            dtpAgendaManutencao.SelectedDate = null;
-            cmbHora.SelectedIndex = -1;
-            cmbMinuto.SelectedIndex = -1;
         }
     }
 }
