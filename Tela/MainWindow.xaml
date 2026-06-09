@@ -10,7 +10,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Backup_Restore"
         mc:Ignorable="d"
-        Title="HOS - Backup Restore" Height="450" Width="375"
+        Title="HOS - Backup Restore" Height="600" Width="450"
         Icon="/Resource/hos-farma.png"
         Closing="Window_Closing">
     <Window.Background>
@@ -128,21 +128,33 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="0,0,0,10" HorizontalAlignment="Center">
-                        <StackPanel Name="painelAgendamento" Visibility="Collapsed" Margin="0,15,0,5" Width="280" HorizontalAlignment="Left">
+                    <StackPanel Margin="0,0,0,10" Width="400">
+                        <StackPanel Name="painelAgendamento" Visibility="Collapsed" Margin="0,15,0,5" Width="380" HorizontalAlignment="Center">
                             <StackPanel>
                                 <TextBlock Text="Detalhes do Agendamento" FontWeight="SemiBold" Foreground="#315C85" Margin="0,0,0,12" HorizontalAlignment="Center"/>
-                                <TextBlock Text="Data de Início:" Margin="0,0,0,5" FontWeight="SemiBold"/>
-                                <DatePicker x:Name="dtpAgendaManutencao" Height="28" Margin="0,0,0,10" Width="248" HorizontalAlignment="Left"/>
-                                <TextBlock Text="Horário de Execução:" Margin="0,0,0,5" FontWeight="SemiBold"/>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                    <ComboBox x:Name="cmbHora" Width="65" Height="28" HorizontalContentAlignment="Center"/>
-                                    <TextBlock Text=":" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Margin="5,0"/>
-                                    <ComboBox x:Name="cmbMinuto" Width="65" Height="28" HorizontalContentAlignment="Center"/>
-                                </StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Data de Início:" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                                        <DatePicker x:Name="dtpAgendaManutencao" Height="28" Margin="0,0,0,10" Width="180" HorizontalAlignment="Left"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Horário de Execução:" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <ComboBox x:Name="cmbHora" Width="55" Height="28" HorizontalContentAlignment="Center"/>
+                                            <TextBlock Text=":" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Margin="3,0"/>
+                                            <ComboBox x:Name="cmbMinuto" Width="55" Height="28" HorizontalContentAlignment="Center"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
                             </StackPanel>
                         </StackPanel>
-                        <TextBlock Text="Banco de Dados:" HorizontalAlignment="Left" Margin="0,5,0,5" FontWeight="SemiBold"/>
+                        <TextBlock Text="Banco de Dados:" HorizontalAlignment="Left" Margin="0,13,0,5" FontWeight="SemiBold"/>
                         <ComboBox Name="cmbBanco" SelectionChanged="cmbBanco_SelectionChanged" Margin="0,0,20,10" Height="25">
                             <ComboBoxItem Content="Firebird 2.5"/>
                             <ComboBoxItem Content="Firebird 4.0"/>
@@ -158,31 +170,31 @@
 
                         <TextBlock Name="lblOrigem" Text="Caminho do Banco Origem:" Margin="0,4,0,0" HorizontalAlignment="Left" FontWeight="SemiBold" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                            <TextBox Name="txtOrigemPath" Height="25" Margin="0,5,5,0" Width="210" />
-                            <Button Name="btnBuscarOrigem" Content="Procurar..." Height="25" Margin="0,5,0,0" Width="80" HorizontalAlignment="Left" Click="btnBuscarOrigem_Click" />
+                            <TextBox Name="txtOrigemPath" Height="25" Margin="0,5,8,0" Width="280" />
+                            <Button Name="btnBuscarOrigem" Content="Procurar..." Height="25" Margin="0,5,0,0" Width="95" HorizontalAlignment="Left" Click="btnBuscarOrigem_Click" />
                         </StackPanel>
 
                         <TextBlock Name="lblDestino" Text="Caminho Destino do Banco:" Margin="0,4,0,0" HorizontalAlignment="Left" FontWeight="SemiBold" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                            <TextBox Name="txtDestinoPath" Height="25" Margin="0,5,5,0" Width="210" SnapsToDevicePixels="True"/>
-                            <Button Name="btnBuscarDestino" Content="Procurar..." Height="25" Margin="0,5,0,0" Width="80" HorizontalAlignment="Left" Click="btnBuscarDestino_Click" />
+                            <TextBox Name="txtDestinoPath" Height="25" Margin="0,5,8,0" Width="280" SnapsToDevicePixels="True"/>
+                            <Button Name="btnBuscarDestino" Content="Procurar..." Height="25" Margin="0,5,0,0" Width="95" HorizontalAlignment="Left" Click="btnBuscarDestino_Click" />
                         </StackPanel>
 
                         <TextBlock Name="lblVersao" Text="Caminho Versão Postgres:" Margin="0,4,0,0" HorizontalAlignment="Left" FontWeight="SemiBold" Visibility="Collapsed" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                            <TextBox Name="txtVersao" Height="25" Margin="0,5,5,0" Width="210" SnapsToDevicePixels="True" Visibility="Collapsed"/>
-                            <Button Name="btnBuscarVersao" Content="Procurar..." Height="25" Margin="0,5,0,0" Width="80" HorizontalAlignment="Left" Click="btnBuscarVersao_Click" Visibility="Collapsed"/>
+                            <TextBox Name="txtVersao" Height="25" Margin="0,5,8,0" Width="280" SnapsToDevicePixels="True" Visibility="Collapsed"/>
+                            <Button Name="btnBuscarVersao" Content="Procurar..." Height="25" Margin="0,5,0,0" Width="95" HorizontalAlignment="Left" Click="btnBuscarVersao_Click" Visibility="Collapsed"/>
                         </StackPanel>
 
                         <TextBlock Name="lblNomeBanco" Text="Nome do Banco:" Margin="5,10,0,0" HorizontalAlignment="Left" FontWeight="SemiBold" Visibility="Collapsed" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                            <TextBox Name="txtNomeBanco" Height="25" Margin="0,5,5,0" Width="250" SnapsToDevicePixels="True" Visibility="Collapsed"/>
+                            <TextBox Name="txtNomeBanco" Height="25" Margin="0,5,5,0" Width="380" SnapsToDevicePixels="True" Visibility="Collapsed"/>
                         </StackPanel>
 
-                        <StackPanel Margin="0,5" HorizontalAlignment="Left" Width="280">
+                        <StackPanel Margin="0,5" HorizontalAlignment="Left" Width="378">
                             <TextBlock Name="lblSenha" Text="Senha Banco Postgres:" HorizontalAlignment="Left" Margin="0,0,0,5" FontWeight="SemiBold" Visibility="Collapsed"/>
                             <DockPanel Name="panelSenha" Visibility="Collapsed">
-                                <ToggleButton Name="btnVerSenha" Content="👁" DockPanel.Dock="Right" Width="35" Click="btnVerSenha_Click" ToolTip="Ver/Ocultar Senha" SnapsToDevicePixels="False" RenderOptions.BitmapScalingMode="HighQuality" RenderOptions.EdgeMode="Aliased"/>
+                                <ToggleButton Name="btnVerSenha" Content="👁" DockPanel.Dock="Right" Margin="5,0,0,0" Width="35" Click="btnVerSenha_Click" ToolTip="Ver/Ocultar Senha" SnapsToDevicePixels="False" RenderOptions.BitmapScalingMode="HighQuality" RenderOptions.EdgeMode="Aliased"/>
                                 <Border CornerRadius="5" BorderBrush="#CCCCCC" BorderThickness="1" Height="25">
                                     <Grid>
                                         <PasswordBox Name="pbSenha" BorderThickness="0" Background="Transparent" Padding="5,0,0,0" VerticalContentAlignment="Center" PasswordChar="*"/>
@@ -201,7 +213,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Button Name="btnIniciar" Grid.Column="0" Content="Iniciar" Click="btnIniciar_Click" />
-                    <Button Name="btnAgendar" Grid.Column="1" Content="Agendar&#x0A;Manutenção" Margin="5,0,5,0" Click="btnAgendar_Click" />
+                    <Button Name="btnAgendar" Grid.Column="1" Content="Agendar" Margin="5,0,5,0" Click="btnAgendar_Click" />
                     <Button Name="btnSair" Grid.Column="2" Content="Sair" Click="btnSair_Click" />
                 </Grid>
 

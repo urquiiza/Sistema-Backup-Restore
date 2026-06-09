@@ -291,7 +291,7 @@ namespace Backup_Restore
                 btnIniciar.Content = "Iniciar";
                 btnIniciar.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
                 btnSair.Content = "Sair";
-                btnAgendar.Content = "Agendar\nManutenção";
+                btnAgendar.Content = "Agendar";
             }
             else
             {
@@ -424,7 +424,7 @@ namespace Backup_Restore
             DateTime? agendaTarefa = DataHoraAgendada();
             string senhaInformada = ObterSenhaAtual();
 
-            if (btnAgendar.Content.ToString() == "Agendar\nManutenção")
+            if (btnAgendar.Content.ToString() == "Agendar")
             {
                 painelAgendamento.Visibility = Visibility.Visible;
                 lblDestino.Visibility = Visibility.Collapsed;
@@ -509,7 +509,7 @@ namespace Backup_Restore
                     cmbAcao.IsEnabled = true;
                     btnIniciar.IsEnabled = true;
                     btnIniciar.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
-                    btnAgendar.Content = "Agendar\nManutenção";
+                    btnAgendar.Content = "Agendar";
                     btnSair.Content = "Sair";
                 }
                 catch (Exception ex)
