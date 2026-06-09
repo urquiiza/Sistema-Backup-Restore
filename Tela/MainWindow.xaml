@@ -186,9 +186,9 @@
                             <Button Name="btnBuscarVersao" Content="Procurar..." Height="25" Margin="0,5,0,0" Width="95" HorizontalAlignment="Left" Click="btnBuscarVersao_Click" Visibility="Collapsed"/>
                         </StackPanel>
 
-                        <TextBlock Name="lblNomeBanco" Text="Nome do Banco:" Margin="5,10,0,0" HorizontalAlignment="Left" FontWeight="SemiBold" Visibility="Collapsed" />
+                        <TextBlock Name="lblNomeBanco" Text="Nome do Banco:" Margin="0,10,0,0" HorizontalAlignment="Left" FontWeight="SemiBold" Visibility="Collapsed" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                            <TextBox Name="txtNomeBanco" Height="25" Margin="0,5,5,0" Width="380" SnapsToDevicePixels="True" Visibility="Collapsed"/>
+                            <TextBox Name="txtNomeBanco" Height="25" Margin="0,5,0,0" Width="380" SnapsToDevicePixels="True" Visibility="Collapsed"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,5" HorizontalAlignment="Left" Width="378">

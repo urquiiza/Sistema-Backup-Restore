@@ -321,13 +321,16 @@ namespace Backup_Restore
         }
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (!fechamentoSeguro)
+            if (!fechamentoSeguro && btnIniciar.Content.ToString() == "Cancelar")
             {
                 e.Cancel = true;
                 this.Hide();
                 iconeBandeja.Visible = true;
-
                 iconeBandeja.ShowBalloonTip(2000, "Minimizado", "O sistema continua rodando em segundo plano. Clique duplo para abrir.", System.Windows.Forms.ToolTipIcon.Info);
+            }
+            else
+            {
+                fechamentoSeguro = true;
             }
         }
         private void cmbBanco_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -482,11 +485,33 @@ namespace Backup_Restore
                 }
                 try
                 {
+                    bool tarefaExiste = false;
+                    string nomeTarefa = "ManutencaoHOS";
                     string caminhoexe = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
                     string argumentos = $"/manutencao \"{cmbBanco.SelectedIndex}\" \"{cmbAcao.SelectedIndex}\" \"{senhaInformada}\" \"{txtVersao.Text}\" \"{txtNomeBanco.Text}\" \"{txtOrigemPath.Text}\" \"{txtDestinoPath.Text}\"";
                     ExecAction executaAcao = new ExecAction(caminhoexe, argumentos);
                     using (TaskService ts = new TaskService())
                     {
+                        Microsoft.Win32.TaskScheduler.Task tarefa = ts.GetTask(nomeTarefa);
+                        if (tarefa != null)
+                        {
+                            tarefaExiste = true;
+                        }
+
+                        if (tarefaExiste && tarefa.NextRunTime >= DateTime.Now.Date)
+                        {
+                            MessageBoxResult resposta = System.Windows.MessageBox.Show(
+                                $"Já existe um agendamento de manutenção em {tarefa.NextRunTime}. Deseja sobrescrever o agendamento atual?",
+                                "Aviso de Sobrescrita",
+                                MessageBoxButton.YesNo,
+                                MessageBoxImage.Warning
+                            );
+
+                            if (resposta == MessageBoxResult.No)
+                            {
+                                return;
+                            }
+                        }
                         TaskDefinition td = ts.NewTask();
                         td.RegistrationInfo.Description = "Manutenção Automática de Banco de Dados HOS.";
 
