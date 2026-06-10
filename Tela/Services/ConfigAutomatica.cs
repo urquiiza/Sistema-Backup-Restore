@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using System.Windows;
 
-namespace Backup_Restore
+namespace Backup_Restore.Services
 {
     public class ConfigAutomatica
     {

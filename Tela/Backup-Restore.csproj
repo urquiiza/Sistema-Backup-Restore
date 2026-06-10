@@ -8,7 +8,7 @@
     <UseWPF>true</UseWPF>
 	<UseWindowsForms>true</UseWindowsForms>
 	<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-	<ApplicationIcon>Farma.ico</ApplicationIcon>
+	<ApplicationIcon>Resource\Farma.ico</ApplicationIcon>
 	<AssemblyName>Backup-Restore</AssemblyName>
 	<RootNamespace>Backup_Restore</RootNamespace>
   </PropertyGroup>
@@ -19,11 +19,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Farma.ico" />
+    <Resource Include="Resource\Farma.ico" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="TaskScheduler" Version="2.12.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Include="App.xaml" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,7 +1,6 @@
-﻿<Application x:Class="Backup_Restore.App"
+﻿<Application x:Class="Backup_Restore.Views.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             Startup="Application_Startup">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Application.Resources>
         
     </Application.Resources>

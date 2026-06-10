@@ -13,8 +13,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32.TaskScheduler;
+using Backup_Restore.Services;
+using System.Text.Json;
 
-namespace Backup_Restore
+namespace Backup_Restore.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -29,7 +31,7 @@ namespace Backup_Restore
             if (System.IO.File.Exists(arquivoConfig))
             {
                 string textoArquivo = System.IO.File.ReadAllText(arquivoConfig);
-                ConfigAutomatica configCarregada = System.Text.Json.JsonSerializer.Deserialize<ConfigAutomatica>(textoArquivo);
+                ConfigAutomatica configCarregada = JsonSerializer.Deserialize<ConfigAutomatica>(textoArquivo);
 
                 string versaoBancoFb = configCarregada.Configuracoes.BANCO_DADOS_VERSAO.Split('.')[0];
                 string extBanco = System.IO.Path.GetExtension(configCarregada.Configuracoes.NOME_BANCODADOS).ToLower();
@@ -66,7 +68,7 @@ namespace Backup_Restore
         }
         private Process processoAtual;
         private bool canceladoPelousuario = false;
-        private System.Windows.Forms.NotifyIcon iconeBandeja;
+        private NotifyIcon iconeBandeja;
         private bool fechamentoSeguro = false;
         public MainWindow()
         {
@@ -486,7 +488,7 @@ namespace Backup_Restore
                 try
                 {
                     bool tarefaExiste = false;
-                    string nomeTarefa = "ManutencaoHOS";
+                    string nomeTarefa = "ManutençãoHOS";
                     string caminhoexe = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
                     string argumentos = $"/manutencao \"{cmbBanco.SelectedIndex}\" \"{cmbAcao.SelectedIndex}\" \"{senhaInformada}\" \"{txtVersao.Text}\" \"{txtNomeBanco.Text}\" \"{txtOrigemPath.Text}\" \"{txtDestinoPath.Text}\"";
                     ExecAction executaAcao = new ExecAction(caminhoexe, argumentos);
@@ -522,7 +524,7 @@ namespace Backup_Restore
                         td.Triggers.Add(dailyTrigger);
                         td.Actions.Add(executaAcao);
 
-                        ts.RootFolder.RegisterTaskDefinition("ManutencaoHOS", td);
+                        ts.RootFolder.RegisterTaskDefinition("ManutençãoHOS", td);
 
                         System.Windows.MessageBox.Show("Agendamento criado com sucesso!");
 

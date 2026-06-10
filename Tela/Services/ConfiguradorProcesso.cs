@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Backup_Restore
+namespace Backup_Restore.Services
 {
     public class ConfiguradorProcesso
     {
