@@ -38,9 +38,18 @@ Para tornar esta aplicação robusta, foram implementadas as seguintes soluçõe
 4. **Agende ou Execute**: Escolha entre disparar a manutenção de forma manual ou utilizar o painel de agendamento para criar a tarefa no Windows.
 
 ## 📂 Estrutura do Projeto
-- `MainWindow.xaml` / `.cs`: Interface principal com validação de dados e máquina de estados da UI.
-- `ComandosFirebird.cs` / `ComandosPostgres.cs`: Lógica de I/O e argumentos de terminal específicos de cada motor.
-- `AgendaManutencao.cs`: Motor de execução em segundo plano com tratamento assíncrono de terminal.
-
+```
+Backup-Restore/
+├── Resource/                 # Arquivos de imagem e ícones do sistema
+├── Services/                 # Motores de lógica e execução em segundo plano
+│   ├── AgendaManutencao.cs
+│   ├── ComandosFirebird.cs
+│   ├── ComandosPostgres.cs
+│   └── ConfiguradorProcesso.cs
+├── Views/                    # Interfaces de usuário e componentes visuais
+│   ├── MainWindow.xaml
+│   └── MainWindow.xaml.cs
+└── App.xaml                  # Inicialização global do aplicativo WPF
+```
 ## 🤝 Contribuição
 Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou enviar pull requests.
