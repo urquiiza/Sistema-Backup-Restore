@@ -1,8 +1,12 @@
 ﻿using Backup_Restore;
+using Backup_Restore.Services;
 using Microsoft.Win32;
+using Microsoft.Win32.TaskScheduler;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Text;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -12,9 +16,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Microsoft.Win32.TaskScheduler;
-using Backup_Restore.Services;
-using System.Text.Json;
 
 namespace Backup_Restore.Views
 {
@@ -229,9 +230,11 @@ namespace Backup_Restore.Views
             AbasMenu.SelectedIndex = 1;
             btnIniciar.Content = "Cancelar";
             btnSair.IsEnabled = false;
-            btnSair.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Gray);
+            btnSair.Background = new SolidColorBrush(Colors.Gray);
             filaLogs.Clear();
             timerTerminal.Start();
+
+            List<string> arquivoExclusao = new List<string>();
 
             try
             {
@@ -261,6 +264,35 @@ namespace Backup_Restore.Views
                         btnSair.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
                         System.Windows.MessageBox.Show("Operacao cancelada!");
                         return;
+                    }
+                    if (config.Arguments.Contains("-b"))
+                    {
+                        string arquivoFbk = System.IO.Path.Combine(@"C:\MANUTENÇÃO", DateTime.Now.ToString("dd.MM.yyyy") + System.IO.Path.GetFileNameWithoutExtension(origem) + ".FBK");
+                        string arquivoZip = System.IO.Path.Combine(@"C:\MANUTENÇÃO", DateTime.Now.ToString("dd.MM.yyyy") + System.IO.Path.GetFileNameWithoutExtension(origem) + ".zip");
+
+                        if (File.Exists(arquivoFbk))
+                        {
+                            using (FileStream zipParaCriar = new FileStream(arquivoZip, FileMode.Create))
+                            {
+                                using (ZipArchive zip = new ZipArchive(zipParaCriar, ZipArchiveMode.Create))
+                                {
+                                    zip.CreateEntryFromFile(arquivoFbk, System.IO.Path.GetFileName(arquivoFbk));
+                                }
+                            }
+                            arquivoExclusao.Add(arquivoFbk);
+                        }
+                        else
+                        {
+                            throw new FileNotFoundException($"Arquivo de backup não encontrado: {arquivoFbk}");
+                        }
+                    }
+                }
+
+                foreach (string arquivo in arquivoExclusao) 
+                {
+                    if (File.Exists(arquivo))
+                    { 
+                        File.Delete(arquivo);
                     }
                 }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,15 +51,15 @@ namespace Backup_Restore.Services
         public static List<ProcessStartInfo> ManutencaoFirebird(string pastaExecutavel, string caminhoOrigem, string caminhoDestino, string senha)
         {
             List<ProcessStartInfo> manutencaoFire = new List<ProcessStartInfo>();
-            
+
             string destinoBackup = @"C:\MANUTENÇÃO";
-            if (!System.IO.Directory.Exists(destinoBackup))
+            if (!Directory.Exists(destinoBackup))
             {
-                System.IO.Directory.CreateDirectory(destinoBackup);
+                Directory.CreateDirectory(destinoBackup);
             }
-            
-            string arquivoTemporario = System.IO.Path.GetFileNameWithoutExtension(caminhoOrigem) + ".FBK";
-            string arquivoFbk = System.IO.Path.Combine(destinoBackup, arquivoTemporario);
+
+            string arquivoTemporario = DateTime.Now.ToString("dd.MM.yyyy") + Path.GetFileNameWithoutExtension(caminhoOrigem) + ".FBK";
+            string arquivoFbk = Path.Combine(destinoBackup, arquivoTemporario);
 
             manutencaoFire.Add(BackupFirebird(pastaExecutavel, caminhoOrigem, arquivoFbk, senha));
             manutencaoFire.Add(RestoreFirebird(pastaExecutavel, arquivoFbk, caminhoOrigem, senha));

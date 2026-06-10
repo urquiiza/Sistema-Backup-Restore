@@ -2,11 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
-using System.IO;
 
 namespace Backup_Restore.Services
 {
@@ -16,11 +17,11 @@ namespace Backup_Restore.Services
         {
             if (banco == "2")
             {
-                string pastaBin = System.IO.Path.Combine(versao, "bin");
+                string pastaBin = Path.Combine(versao, "bin");
                 var listaComandos = ComandosPostgres.ManutencaoPostgres(pastaBin, nomeBanco, senha);
 
                 string pastaUsuario = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                string arquivoLog = System.IO.Path.Combine(pastaUsuario, ".hos", "historico_manutencao.txt");
+                string arquivoLog = Path.Combine(pastaUsuario, ".hos", "historico_manutencao.txt");
 
                 try
                 {
@@ -56,13 +57,13 @@ namespace Backup_Restore.Services
                         }
                     }
                     string mensagemSucesso = $"{DateTime.Now} Manutenção do banco '{nomeBanco}' concluída com sucesso.\n";
-                    System.IO.File.AppendAllText(arquivoLog, mensagemSucesso);
+                    File.AppendAllText(arquivoLog, mensagemSucesso);
                     return;
                 }
                 catch (Exception ex)
                 {
                     string mensagemFalha = $"\n{DateTime.Now} ERRO na manutenção do banco '{nomeBanco}'.\n\n{ex}\n";
-                    System.IO.File.AppendAllText(arquivoLog, mensagemFalha);
+                    File.AppendAllText(arquivoLog, mensagemFalha);
                     System.Windows.MessageBox.Show($"{DateTime.Now} ERRO: Manutenção automática falhou.\nVerifique os logs de erros para mais informações.\n\nCaminho: {arquivoLog}");
                     return;
                 }
@@ -74,13 +75,14 @@ namespace Backup_Restore.Services
                     string pastaFb = banco == "0" ? @"C:\Program Files\Firebird\Firebird_2_5\bin" : @"C:\Program Files\Firebird\Firebird_4_0";
                     var listaComandos = ComandosFirebird.ManutencaoFirebird(pastaFb, caminhoOrigem, caminhoDestino, senha);
                     string pastaUsuario = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                    string arquivoLog = System.IO.Path.Combine(pastaUsuario, ".hos", "historico_manutencao.txt");
+                    string arquivoLog = Path.Combine(pastaUsuario, ".hos", "historico_manutencao.txt");
+                    List<string> arquivoExclusao = new List<string>();
 
                     try
                     {
                         foreach (var comando in listaComandos)
                         {
-                            using (System.Diagnostics.Process processos = new System.Diagnostics.Process())
+                            using (Process processos = new Process())
                             {
                                 comando.RedirectStandardOutput = true;
                                 comando.RedirectStandardError = true;
@@ -106,18 +108,51 @@ namespace Backup_Restore.Services
                                 processos.WaitForExit();
                                 if (processos.ExitCode != 0)
                                 {
-                                    throw new Exception("Código Exitado.");
+                                    throw new Exception(mensagemErro);
                                 }
+
+                                if (comando.Arguments.Contains("-b"))
+                                {
+
+                                    string arquivoFbk = Path.Combine(@"C:\MANUTENÇÃO", DateTime.Now.ToString("dd.MM.yyyy") + Path.GetFileNameWithoutExtension(caminhoOrigem) + ".FBK");
+                                    string arquivoZip = Path.Combine(@"C:\MANUTENÇÃO", DateTime.Now.ToString("dd.MM.yyyy") + Path.GetFileNameWithoutExtension(caminhoOrigem) + ".zip");
+
+                                    if (File.Exists(arquivoFbk))
+                                    {
+                                        using (FileStream zipParaCriar = new FileStream(arquivoZip, FileMode.Create))
+                                        {
+                                            using (ZipArchive zip = new ZipArchive(zipParaCriar, ZipArchiveMode.Create))
+                                            {
+                                                zip.CreateEntryFromFile(arquivoFbk, System.IO.Path.GetFileName(arquivoFbk));
+                                            }
+                                        }
+                                        arquivoExclusao.Add(arquivoFbk);
+                                    }
+                                    else
+                                    {
+                                        throw new FileNotFoundException($"Arquivo de backup não encontrado: {arquivoFbk}");
+                                    }
+                                }
+
                             }
                         }
+
+                        foreach (string arquivo in arquivoExclusao)
+                        {
+                            if (File.Exists(arquivo))
+                            {
+                                File.Delete(arquivo);
+                            }
+                        }
+
                         string mensagemSucesso = $"{DateTime.Now} Manutenção do banco '{nomeBanco}' concluída com sucesso.\n";
-                        System.IO.File.AppendAllText(arquivoLog, mensagemSucesso);
+                        File.AppendAllText(arquivoLog, mensagemSucesso);
                         return;
                     }
                     catch (Exception ex)
                     {
                         string mensagemFalha = $"{DateTime.Now} ERRO na manutenção do banco '{nomeBanco}'.\n{ex}\n";
-                        System.IO.File.AppendAllText(arquivoLog, mensagemFalha);
+                        File.AppendAllText(arquivoLog, mensagemFalha);
                         System.Windows.MessageBox.Show($"{DateTime.Now} ERRO: Manutenção automática falhou.\nVerifique os logs de erros para mais informações.\n\nCaminho: {arquivoLog}");
                         return;
                     }
