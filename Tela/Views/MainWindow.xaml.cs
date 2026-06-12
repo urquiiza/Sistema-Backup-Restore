@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.ServiceProcess;
 
 namespace Backup_Restore.Views
 {
@@ -202,6 +203,8 @@ namespace Backup_Restore.Views
             string origem = txtOrigemPath.Text;
             string destino = txtDestinoPath.Text;
             string senha = ObterSenhaAtual();
+            string copiaBancoManutencao = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(origem), System.IO.Path.GetFileNameWithoutExtension(origem) + "-Copia.FDB");
+            string copiaBancoGuardar = System.IO.Path.Combine(@"C:\MANUTENÇÃO", DateTime.Now.ToString("dd.MM.yyyy") + System.IO.Path.GetFileName(origem));
 
             int indexBanco = cmbBanco.SelectedIndex;
             int indexAcao = cmbAcao.SelectedIndex;
@@ -212,9 +215,69 @@ namespace Backup_Restore.Views
             {
                 string pastaFb = indexBanco == 0 ? @"C:\Program Files\Firebird\Firebird_2_5\bin" : @"C:\Program Files\Firebird\Firebird_4_0";
 
+                if (cmbAcao.SelectedIndex == 2) 
+                {
+                    string serviceNameGuardian = "FirebirdGuardianDefaultInstance";
+                    string serviceNameServer = "FirebirdServerDefaultInstance";
+
+                    string[] servicos =
+                    {
+                            serviceNameGuardian,
+                            serviceNameServer
+                        };
+
+                    foreach (string nomeServico in servicos)
+                    {
+                        try
+                        {
+
+                            using (ServiceController servico = new ServiceController(nomeServico))
+                            {
+                                servico.Refresh();
+
+                                if (servico.Status == ServiceControllerStatus.Running)
+                                {
+                                    servico.Stop();
+                                    servico.WaitForStatus(ServiceControllerStatus.Stopped);
+                                }
+                            }
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            // firebird 4.0 não possui guardian, então ignora
+                            continue;
+                        }
+                    }
+
+                    File.Copy(origem, copiaBancoManutencao, true);
+                    File.Copy(origem, copiaBancoGuardar, true);
+
+                    foreach (string nomeServico in servicos)
+                    {
+                        try
+                        {
+                            using (ServiceController servico = new ServiceController(nomeServico))
+                            {
+                                servico.Refresh();
+
+                                if (servico.Status == ServiceControllerStatus.Stopped)
+                                {
+                                    servico.Start();
+                                    servico.WaitForStatus(ServiceControllerStatus.Running);
+                                }
+                            }
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            // firebird 4.0 não possui guardian, então ignora
+                            continue;
+                        }
+                    }
+                }
+                
                 if (indexAcao == 0) executarProcesso.Add(ComandosFirebird.BackupFirebird(pastaFb, origem, destino, senha));
                 else if (indexAcao == 1) executarProcesso.Add(ComandosFirebird.RestoreFirebird(pastaFb, origem, destino, senha));
-                else executarProcesso.AddRange(ComandosFirebird.ManutencaoFirebird(pastaFb, origem, destino, senha));
+                else executarProcesso.AddRange(ComandosFirebird.ManutencaoFirebird(pastaFb, copiaBancoManutencao, destino, senha));
             }
             else
             {
@@ -265,21 +328,23 @@ namespace Backup_Restore.Views
                         System.Windows.MessageBox.Show("Operacao cancelada!");
                         return;
                     }
-                    if (config.Arguments.Contains("-b"))
-                    {
-                        string arquivoFbk = System.IO.Path.Combine(@"C:\MANUTENÇÃO", DateTime.Now.ToString("dd.MM.yyyy") + System.IO.Path.GetFileNameWithoutExtension(origem) + ".FBK");
-                        string arquivoZip = System.IO.Path.Combine(@"C:\MANUTENÇÃO", DateTime.Now.ToString("dd.MM.yyyy") + System.IO.Path.GetFileNameWithoutExtension(origem) + ".zip");
 
-                        if (File.Exists(arquivoFbk))
+                    if (config.Arguments.Contains("-b") && cmbAcao.SelectedIndex == 2)
+                    {
+                        string arquivoFbk = System.IO.Path.Combine(@"C:\MANUTENÇÃO", DateTime.Now.ToString("dd.MM.yyyy") + System.IO.Path.GetFileNameWithoutExtension(copiaBancoManutencao) + ".FBK");
+                        string arquivoZip = System.IO.Path.Combine(@"C:\MANUTENÇÃO", System.IO.Path.GetFileNameWithoutExtension(copiaBancoGuardar) + ".zip");
+
+                        if (File.Exists(copiaBancoGuardar))
                         {
                             using (FileStream zipParaCriar = new FileStream(arquivoZip, FileMode.Create))
                             {
                                 using (ZipArchive zip = new ZipArchive(zipParaCriar, ZipArchiveMode.Create))
                                 {
-                                    zip.CreateEntryFromFile(arquivoFbk, System.IO.Path.GetFileName(arquivoFbk));
+                                    zip.CreateEntryFromFile(copiaBancoGuardar, System.IO.Path.GetFileName(copiaBancoGuardar));
                                 }
                             }
                             arquivoExclusao.Add(arquivoFbk);
+                            arquivoExclusao.Add(copiaBancoGuardar);
                         }
                         else
                         {
@@ -302,6 +367,7 @@ namespace Backup_Restore.Views
                 btnSair.IsEnabled = true;
                 btnSair.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
                 System.Windows.MessageBox.Show("Processo finalizado com sucesso!");
+                System.IO.File.Move(copiaBancoManutencao, origem, true);
             }
             catch (Exception ex)
             {
