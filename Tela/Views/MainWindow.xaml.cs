@@ -1,5 +1,4 @@
-﻿using Backup_Restore;
-using Backup_Restore.Services;
+﻿using Backup_Restore.Services;
 using Microsoft.Win32;
 using Microsoft.Win32.TaskScheduler;
 using System.Diagnostics;
@@ -215,167 +214,136 @@ namespace Backup_Restore.Views
             {
                 string pastaFb = indexBanco == 0 ? @"C:\Program Files\Firebird\Firebird_2_5\bin" : @"C:\Program Files\Firebird\Firebird_4_0";
 
-                if (cmbAcao.SelectedIndex == 2) 
+                if (cmbAcao.SelectedIndex == 2)
                 {
-                    string serviceNameGuardian = "FirebirdGuardianDefaultInstance";
-                    string serviceNameServer = "FirebirdServerDefaultInstance";
-
-                    string[] servicos =
-                    {
-                            serviceNameGuardian,
-                            serviceNameServer
-                        };
-
-                    foreach (string nomeServico in servicos)
-                    {
-                        try
-                        {
-
-                            using (ServiceController servico = new ServiceController(nomeServico))
-                            {
-                                servico.Refresh();
-
-                                if (servico.Status == ServiceControllerStatus.Running)
-                                {
-                                    servico.Stop();
-                                    servico.WaitForStatus(ServiceControllerStatus.Stopped);
-                                }
-                            }
-                        }
-                        catch (InvalidOperationException)
-                        {
-                            // firebird 4.0 não possui guardian, então ignora
-                            continue;
-                        }
-                    }
+                    StatusFirebird.DesativaFirebird();
 
                     File.Copy(origem, copiaBancoManutencao, true);
                     File.Copy(origem, copiaBancoGuardar, true);
 
-                    foreach (string nomeServico in servicos)
-                    {
-                        try
-                        {
-                            using (ServiceController servico = new ServiceController(nomeServico))
-                            {
-                                servico.Refresh();
+                    StatusFirebird.AtivaFirebird();
 
-                                if (servico.Status == ServiceControllerStatus.Stopped)
+                    if (indexAcao == 0) executarProcesso.Add(ComandosFirebird.BackupFirebird(pastaFb, origem, destino, senha));
+                    else if (indexAcao == 1) executarProcesso.Add(ComandosFirebird.RestoreFirebird(pastaFb, origem, destino, senha));
+                    else executarProcesso.AddRange(ComandosFirebird.ManutencaoFirebird(pastaFb, copiaBancoManutencao, destino, senha));
+                }
+                else
+                {
+                    string pastaPg = System.IO.Path.Combine(txtVersao.Text, "bin");
+                    string nomeBanco = txtNomeBanco.Text;
+
+                    if (indexAcao == 0) executarProcesso.Add(ComandosPostgres.BackupPostgres(pastaPg, nomeBanco, destino, senha));
+                    else if (indexAcao == 1) executarProcesso.AddRange(ComandosPostgres.RestorePostgres(pastaPg, nomeBanco, origem, senha));
+                    else executarProcesso.AddRange(ComandosPostgres.ManutencaoPostgres(pastaPg, nomeBanco, senha));
+                }
+
+                txtTerminal.Clear();
+                AbasMenu.SelectedIndex = 1;
+                btnIniciar.Content = "Cancelar";
+                btnSair.IsEnabled = false;
+                btnSair.Background = new SolidColorBrush(Colors.Gray);
+                filaLogs.Clear();
+                timerTerminal.Start();
+
+                List<string> arquivoExclusao = new List<string>();
+
+                try
+                {
+                    foreach (var config in executarProcesso)
+                    {
+                        processoAtual = new Process();
+                        processoAtual.StartInfo = config;
+
+                        processoAtual.OutputDataReceived += (s, args) => { if (!string.IsNullOrEmpty(args.Data)) filaLogs.Enqueue(args.Data); };
+                        processoAtual.ErrorDataReceived += (s, args) => { if (!string.IsNullOrEmpty(args.Data)) filaLogs.Enqueue(args.Data); };
+
+                        processoAtual.Start();
+                        processoAtual.BeginOutputReadLine();
+                        processoAtual.BeginErrorReadLine();
+
+                        await processoAtual.WaitForExitAsync();
+
+                        if (processoAtual.ExitCode != 0 && !canceladoPelousuario && System.IO.Path.GetFileName(config.FileName) != "psql.exe")
+                        {
+                            btnIniciar.Content = "Iniciar";
+                            btnSair.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
+                            throw new Exception("O comando falhou. Verifique o terminal para mais detalhes.");
+                        }
+                        if (canceladoPelousuario == true)
+                        {
+                            btnIniciar.Content = "Iniciar";
+                            btnSair.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
+                            System.Windows.MessageBox.Show("Operacao cancelada!");
+                            if (File.Exists(copiaBancoManutencao))
+                            {
+                                File.Delete(copiaBancoManutencao);
+                                File.Delete(copiaBancoGuardar);
+                            }
+                            return;
+                        }
+
+                        if (config.Arguments.Contains("-b") && cmbAcao.SelectedIndex == 2)
+                        {
+                            string arquivoFbk = System.IO.Path.Combine(@"C:\MANUTENÇÃO", DateTime.Now.ToString("dd.MM.yyyy") + System.IO.Path.GetFileNameWithoutExtension(copiaBancoManutencao) + ".FBK");
+                            string arquivoZip = System.IO.Path.Combine(@"C:\MANUTENÇÃO", System.IO.Path.GetFileNameWithoutExtension(copiaBancoGuardar) + ".zip");
+
+                            if (File.Exists(copiaBancoGuardar))
+                            {
+                                using (FileStream zipParaCriar = new FileStream(arquivoZip, FileMode.Create))
                                 {
-                                    servico.Start();
-                                    servico.WaitForStatus(ServiceControllerStatus.Running);
+                                    using (ZipArchive zip = new ZipArchive(zipParaCriar, ZipArchiveMode.Create))
+                                    {
+                                        zip.CreateEntryFromFile(copiaBancoGuardar, System.IO.Path.GetFileName(copiaBancoGuardar));
+                                    }
                                 }
+                                arquivoExclusao.Add(arquivoFbk);
+                                arquivoExclusao.Add(copiaBancoGuardar);
+                            }
+                            else
+                            {
+                                throw new FileNotFoundException($"Arquivo de backup não encontrado: {copiaBancoGuardar}");
                             }
                         }
-                        catch (InvalidOperationException)
+                    }
+
+                    foreach (string arquivo in arquivoExclusao)
+                    {
+                        if (File.Exists(arquivo))
                         {
-                            // firebird 4.0 não possui guardian, então ignora
-                            continue;
+                            File.Delete(arquivo);
                         }
                     }
+
+                    timerTerminal.Stop();
+
+                    btnIniciar.Content = "Iniciar";
+                    btnSair.IsEnabled = true;
+                    btnSair.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
+                    timerTerminal.Stop();
+                    txtTerminal.AppendText(Environment.NewLine + "=============================================" + Environment.NewLine);
+                    txtTerminal.AppendText(">>> PROCESSO FINALIZADO COM SUCESSO! <<<" + Environment.NewLine);
+                    txtTerminal.AppendText("=============================================" + Environment.NewLine);
+                    txtTerminal.ScrollToEnd();
+                    StatusFirebird.DesativaFirebird();
+                    System.IO.File.Move(copiaBancoManutencao, origem, true);
+                    StatusFirebird.AtivaFirebird();
                 }
-                
-                if (indexAcao == 0) executarProcesso.Add(ComandosFirebird.BackupFirebird(pastaFb, origem, destino, senha));
-                else if (indexAcao == 1) executarProcesso.Add(ComandosFirebird.RestoreFirebird(pastaFb, origem, destino, senha));
-                else executarProcesso.AddRange(ComandosFirebird.ManutencaoFirebird(pastaFb, copiaBancoManutencao, destino, senha));
-            }
-            else
-            {
-                string pastaPg = System.IO.Path.Combine(txtVersao.Text, "bin");
-                string nomeBanco = txtNomeBanco.Text;
-
-                if (indexAcao == 0) executarProcesso.Add(ComandosPostgres.BackupPostgres(pastaPg, nomeBanco, destino, senha));
-                else if (indexAcao == 1) executarProcesso.AddRange(ComandosPostgres.RestorePostgres(pastaPg, nomeBanco, origem, senha));
-                else executarProcesso.AddRange(ComandosPostgres.ManutencaoPostgres(pastaPg, nomeBanco, senha));
-            }
-
-            txtTerminal.Clear();
-            AbasMenu.SelectedIndex = 1;
-            btnIniciar.Content = "Cancelar";
-            btnSair.IsEnabled = false;
-            btnSair.Background = new SolidColorBrush(Colors.Gray);
-            filaLogs.Clear();
-            timerTerminal.Start();
-
-            List<string> arquivoExclusao = new List<string>();
-
-            try
-            {
-                foreach (var config in executarProcesso)
+                catch (Exception ex)
                 {
-                    processoAtual = new Process();
-                    processoAtual.StartInfo = config;
-
-                    processoAtual.OutputDataReceived += (s, args) => { if (!string.IsNullOrEmpty(args.Data)) filaLogs.Enqueue(args.Data); };
-                    processoAtual.ErrorDataReceived += (s, args) => { if (!string.IsNullOrEmpty(args.Data)) filaLogs.Enqueue(args.Data); };
-
-                    processoAtual.Start();
-                    processoAtual.BeginOutputReadLine();
-                    processoAtual.BeginErrorReadLine();
-
-                    await processoAtual.WaitForExitAsync();
-
-                    if (processoAtual.ExitCode != 0 && !canceladoPelousuario && System.IO.Path.GetFileName(config.FileName) != "psql.exe")
+                    timerTerminal.Stop();
+                    btnIniciar.Content = "Iniciar";
+                    btnSair.IsEnabled = true;
+                    btnSair.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
+                    System.Windows.MessageBox.Show($"ERRO:\n{ex.Message}",
+                    "Aviso de sobrescrita",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                    );
+                    if (File.Exists(copiaBancoManutencao))
                     {
-                        btnIniciar.Content = "Iniciar";
-                        btnSair.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
-                        throw new Exception("O comando falhou. Verifique o terminal para mais detalhes.");
-                    }
-                    if (canceladoPelousuario == true)
-                    {
-                        btnIniciar.Content = "Iniciar";
-                        btnSair.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
-                        System.Windows.MessageBox.Show("Operacao cancelada!");
-                        return;
-                    }
-
-                    if (config.Arguments.Contains("-b") && cmbAcao.SelectedIndex == 2)
-                    {
-                        string arquivoFbk = System.IO.Path.Combine(@"C:\MANUTENÇÃO", DateTime.Now.ToString("dd.MM.yyyy") + System.IO.Path.GetFileNameWithoutExtension(copiaBancoManutencao) + ".FBK");
-                        string arquivoZip = System.IO.Path.Combine(@"C:\MANUTENÇÃO", System.IO.Path.GetFileNameWithoutExtension(copiaBancoGuardar) + ".zip");
-
-                        if (File.Exists(copiaBancoGuardar))
-                        {
-                            using (FileStream zipParaCriar = new FileStream(arquivoZip, FileMode.Create))
-                            {
-                                using (ZipArchive zip = new ZipArchive(zipParaCriar, ZipArchiveMode.Create))
-                                {
-                                    zip.CreateEntryFromFile(copiaBancoGuardar, System.IO.Path.GetFileName(copiaBancoGuardar));
-                                }
-                            }
-                            arquivoExclusao.Add(arquivoFbk);
-                            arquivoExclusao.Add(copiaBancoGuardar);
-                        }
-                        else
-                        {
-                            throw new FileNotFoundException($"Arquivo de backup não encontrado: {arquivoFbk}");
-                        }
+                        File.Delete(copiaBancoManutencao);
                     }
                 }
-
-                foreach (string arquivo in arquivoExclusao) 
-                {
-                    if (File.Exists(arquivo))
-                    { 
-                        File.Delete(arquivo);
-                    }
-                }
-
-                timerTerminal.Stop();
-
-                btnIniciar.Content = "Iniciar";
-                btnSair.IsEnabled = true;
-                btnSair.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
-                System.Windows.MessageBox.Show("Processo finalizado com sucesso!");
-                System.IO.File.Move(copiaBancoManutencao, origem, true);
-            }
-            catch (Exception ex)
-            {
-                timerTerminal.Stop();
-                btnIniciar.Content = "Iniciar";
-                btnSair.IsEnabled = true;
-                btnSair.Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#315C85");
-                System.Windows.MessageBox.Show($"ERRO:\n{ex.Message}");
             }
         }
         private void btnSair_Click(object sender, RoutedEventArgs e)

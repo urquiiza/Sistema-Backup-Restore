@@ -38,13 +38,7 @@ namespace Backup_Restore.Services
                             processos.StartInfo = comando;
 
                             processos.OutputDataReceived += (s, args) => { };
-                            processos.ErrorDataReceived += (s, args) => 
-                            { 
-                                if (!string.IsNullOrEmpty(args.Data))
-                                {
-                                    mensagemErro += args.Data + "\n";
-                                }
-                            };
+                            processos.ErrorDataReceived += (s, args) => { if (!string.IsNullOrEmpty(args.Data)) {mensagemErro += args.Data + "\n";}};
 
                             processos.Start();
                             processos.BeginOutputReadLine();
@@ -113,7 +107,6 @@ namespace Backup_Restore.Services
 
                                 if (comando.Arguments.Contains("-b"))
                                 {
-
                                     string arquivoFbk = Path.Combine(@"C:\MANUTENÇÃO", DateTime.Now.ToString("dd.MM.yyyy") + Path.GetFileNameWithoutExtension(caminhoOrigem) + ".FBK");
                                     string arquivoZip = Path.Combine(@"C:\MANUTENÇÃO", DateTime.Now.ToString("dd.MM.yyyy") + Path.GetFileNameWithoutExtension(caminhoOrigem) + ".zip");
 
