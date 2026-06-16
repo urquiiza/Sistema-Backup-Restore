@@ -19,12 +19,10 @@ namespace Backup_Restore.Services
                     NOME_GUARDIAN,
                     NOME_SERVER
             };
-
             foreach (string nomeServico in servicos)
             {
                 try
                 {
-
                     using (ServiceController servico = new ServiceController(nomeServico))
                     {
                         servico.Refresh();
@@ -50,7 +48,6 @@ namespace Backup_Restore.Services
                 NOME_GUARDIAN,
                 NOME_SERVER
             };
-
             foreach (string nomeServico in servicos)
             {
                 try
