@@ -15,19 +15,19 @@ namespace Backup_Restore.Services
     {
         public void Executar(string banco, string acao, string senha, string versao = null, string nomeBanco = null, string caminhoOrigem = null, string caminhoDestino = null)
         {
+            string pastaUsuario = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string arquivoLog = Path.Combine(pastaUsuario, ".hos", "manutencao.txt");
+
             if (banco == "2")
             {
                 string pastaBin = Path.Combine(versao, "bin");
                 var listaComandos = ComandosPostgres.ManutencaoPostgres(pastaBin, nomeBanco, senha);
 
-                string pastaUsuario = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                string arquivoLog = Path.Combine(pastaUsuario, ".hos", "historico_manutencao.txt");
-
                 try
                 {
                     foreach (var comando in listaComandos)
                     {
-                        using (System.Diagnostics.Process processos = new System.Diagnostics.Process())
+                        using (Process processos = new Process())
                         {
                             comando.RedirectStandardOutput = true;
                             comando.RedirectStandardError = true;
@@ -67,9 +67,16 @@ namespace Backup_Restore.Services
                 if (banco == "0" || banco == "1")
                 {
                     string pastaFb = banco == "0" ? @"C:\Program Files\Firebird\Firebird_2_5\bin" : @"C:\Program Files\Firebird\Firebird_4_0";
+                    string copiaBancoManutencao = Path.Combine(Path.GetDirectoryName(caminhoOrigem), Path.GetFileNameWithoutExtension(caminhoOrigem) + "-Copia.FDB");
+                    string copiaBancoGuardar = Path.Combine(@"C:\MANUTENÇÃO", DateTime.Now.ToString("dd.MM.yyyy") + Path.GetFileName(caminhoOrigem));
+
+                    StatusFirebird.DesativaFirebird();
+                    File.Copy(caminhoOrigem, copiaBancoManutencao, true);
+                    File.Copy(caminhoOrigem, copiaBancoGuardar, true);
+                    StatusFirebird.AtivaFirebird();
+
                     var listaComandos = ComandosFirebird.ManutencaoFirebird(pastaFb, caminhoOrigem, caminhoDestino, senha);
-                    string pastaUsuario = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                    string arquivoLog = Path.Combine(pastaUsuario, ".hos", "historico_manutencao.txt");
+
                     List<string> arquivoExclusao = new List<string>();
 
                     try
@@ -110,15 +117,16 @@ namespace Backup_Restore.Services
                                     string arquivoFbk = Path.Combine(@"C:\MANUTENÇÃO", DateTime.Now.ToString("dd.MM.yyyy") + Path.GetFileNameWithoutExtension(caminhoOrigem) + ".FBK");
                                     string arquivoZip = Path.Combine(@"C:\MANUTENÇÃO", DateTime.Now.ToString("dd.MM.yyyy") + Path.GetFileNameWithoutExtension(caminhoOrigem) + ".zip");
 
-                                    if (File.Exists(arquivoFbk))
+                                    if (File.Exists(copiaBancoGuardar))
                                     {
                                         using (FileStream zipParaCriar = new FileStream(arquivoZip, FileMode.Create))
                                         {
                                             using (ZipArchive zip = new ZipArchive(zipParaCriar, ZipArchiveMode.Create))
                                             {
-                                                zip.CreateEntryFromFile(arquivoFbk, System.IO.Path.GetFileName(arquivoFbk));
+                                                zip.CreateEntryFromFile(copiaBancoGuardar, Path.GetFileName(copiaBancoGuardar));
                                             }
                                         }
+                                        arquivoExclusao.Add(copiaBancoGuardar);
                                         arquivoExclusao.Add(arquivoFbk);
                                     }
                                     else
@@ -137,6 +145,9 @@ namespace Backup_Restore.Services
                                 File.Delete(arquivo);
                             }
                         }
+                        StatusFirebird.DesativaFirebird();
+                        File.Move(copiaBancoManutencao, caminhoOrigem, true);
+                        StatusFirebird.AtivaFirebird();
 
                         string mensagemSucesso = $"{DateTime.Now} Manutenção do banco '{nomeBanco}' concluída com sucesso.\n";
                         File.AppendAllText(arquivoLog, mensagemSucesso);
@@ -146,7 +157,10 @@ namespace Backup_Restore.Services
                     {
                         string mensagemFalha = $"{DateTime.Now} ERRO na manutenção do banco '{nomeBanco}'.\n{ex}\n";
                         File.AppendAllText(arquivoLog, mensagemFalha);
-                        System.Windows.MessageBox.Show($"{DateTime.Now} ERRO: Manutenção automática falhou.\nVerifique os logs de erros para mais informações.\n\nCaminho: {arquivoLog}");
+                        if (File.Exists(copiaBancoManutencao))
+                        {
+                            File.Delete(copiaBancoManutencao);
+                        }
                         return;
                     }
                 }

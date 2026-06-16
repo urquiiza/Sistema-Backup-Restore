@@ -220,6 +220,12 @@ namespace Backup_Restore.Views
                 {
                     StatusFirebird.DesativaFirebird();
 
+                    string destinoBackup = @"C:\MANUTENÇÃO";
+                    if (!Directory.Exists(destinoBackup))
+                    {
+                        Directory.CreateDirectory(destinoBackup);
+                    }
+
                     File.Copy(origem, copiaBancoManutencao, true);
                     File.Copy(origem, copiaBancoGuardar, true);
 
@@ -586,11 +592,11 @@ namespace Backup_Restore.Views
                         TaskDefinition td = ts.NewTask();
                         td.RegistrationInfo.Description = "Manutenção Automática de Banco de Dados HOS.";
 
-                        DailyTrigger dailyTrigger = new DailyTrigger();
+                        td.Principal.RunLevel = TaskRunLevel.Highest;
 
-                        dailyTrigger.StartBoundary = (DateTime)agendaTarefa;
-
-                        td.Triggers.Add(dailyTrigger);
+                        TimeTrigger timerTrigger = new TimeTrigger();
+                        timerTrigger.StartBoundary = (DateTime)agendaTarefa;
+                        td.Triggers.Add(timerTrigger);
                         td.Actions.Add(executaAcao);
 
                         ts.RootFolder.RegisterTaskDefinition("ManutençãoHOS", td);

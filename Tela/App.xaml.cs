@@ -11,8 +11,14 @@ namespace Backup_Restore.Views
     /// </summary>
     public partial class App : System.Windows.Application
     {
+        private static Mutex _mutex = null;
         protected override void OnStartup(StartupEventArgs e)
         {
+            const string nomeAplicativo = "BackupRestore_InstanciaUnica";
+            bool criadoNovo;
+
+            _mutex = new Mutex(true, nomeAplicativo, out criadoNovo);
+
             if (e.Args.Length > 1 && e.Args[0] == "/manutencao")
             {
                     AgendaManutencao agendaManutencao = new AgendaManutencao();
@@ -21,8 +27,18 @@ namespace Backup_Restore.Views
             }
             else
             {
-                MainWindow telaPrincipal = new MainWindow();
-                telaPrincipal.Show();
+                if (!criadoNovo)
+                {
+                    System.Windows.MessageBox.Show("O aplicativo já está em execução!", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    App.Current.Shutdown();
+                    return;
+                }
+                else
+                {
+                    MainWindow telaPrincipal = new MainWindow();
+                    telaPrincipal.Show();
+                }
+                base.OnStartup(e);
             }
         }
     }
